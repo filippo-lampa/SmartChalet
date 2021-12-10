@@ -6,7 +6,8 @@ import java.util.Date;
 public class Prenotazione {
     private int id;
     private int fasciaOraria;
-    private Date data;
+    private Date dataInizio;
+    private Date dataFine;
     private int idCliente;
     private ArrayList<Ombrellone> ombrelloni;
     private int numeroLettini;
@@ -28,12 +29,20 @@ public class Prenotazione {
         this.fasciaOraria = fasciaOraria;
     }
 
-    public Date getData() {
-        return data;
+    public Date getDataInizio() {
+        return dataInizio;
     }
 
-    public void setData(Date data) {
-        this.data = data;
+    public void setDataInizio(Date dataInizio) {
+        this.dataInizio = dataInizio;
+    }
+
+    public Date getDataFine() {
+        return dataFine;
+    }
+
+    public void setDataFine(Date dataFine) {
+        this.dataFine = dataFine;
     }
 
     public int getIdCliente() {

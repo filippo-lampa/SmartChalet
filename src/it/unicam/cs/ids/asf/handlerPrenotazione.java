@@ -9,27 +9,30 @@ import java.util.Scanner;
 public class handlerPrenotazione {
     private ArrayList<Prenotazione> listaPrenotazioni = new ArrayList<>();
 
-    Prenotazione prenotazioneInCorso = new Prenotazione();
+    Prenotazione prenotazioneInCorso;
 
 
     public void prenotaOmbrellone() {
+        prenotazioneInCorso = new Prenotazione();
+
         inserisciOrarioDesiderato();
         //TODO ottieniVistaSpiaggia();
         //TODO richiestaListaPrenotazioni();
+        //TODO controlloDisponibilita();
         selezionaOmbrelloneELettini();
-        controllaDisponibilità(prenotazioneInCorso.getId(), prenotazioneInCorso.getData(), prenotazioneInCorso.getFasciaOraria(), listaPrenotazioni);
+        //controlloOccupazione(prenotazioneInCorso.getId(), prenotazioneInCorso.getData(), prenotazioneInCorso.getFasciaOraria(), listaPrenotazioni);
 
-        Scanner kbd = new Scanner(System.in);
+        Scanner scans = new Scanner(System.in);
 
         String answer;
         boolean yn;
 
         System.out.println("Hai scelto questa prenotazione:");
         System.out.println("Ombrellone "+prenotazioneInCorso.getId()+" e "+prenotazioneInCorso.getNumeroLettini()+" lettino/i.");
-        System.out.println("in data "+prenotazioneInCorso.getData()+".");
+        System.out.println("da "+prenotazioneInCorso.getDataInizio()+" a "+prenotazioneInCorso.getDataFine()+".");
         System.out.println("Confermi la prenotazione? (y/n)");
         while (true) {
-            answer = kbd.nextLine().trim().toLowerCase();
+            answer = scans.nextLine().trim().toLowerCase();
             if (answer.equals("y")) {
                 yn = true;
                 confermaOperazione();
@@ -42,18 +45,32 @@ public class handlerPrenotazione {
                 System.out.println("Reinserire (y/n)");
             }
         }
+        inviaDatiPagamento();
+        //TODO: UpdateDatabase();
 
     }
 
 
-    public void inserisciOrarioDesiderato() {
+    private void inserisciOrarioDesiderato() {
+        //TODO: da modificare
         Scanner sc = new Scanner(System.in);
-        System.out.print("Inserire la data [gg/mm/yyyy]: ");
-        Date data = null;
+        System.out.print("Inserire la data di inizio [gg/mm/yyyy]: ");
+        Date dataStart = null;
         try {
-            data = new SimpleDateFormat("dd/MM/yyyy").parse(sc.nextLine());
+            dataStart = new SimpleDateFormat("dd/MM/yyyy").parse(sc.nextLine());
         } catch (ParseException e) {
-            throw new IllegalArgumentException("Formato data non valido.");
+            System.out.println("Formato data non valido.");
+            inserisciOrarioDesiderato();
+
+        }
+
+        System.out.print("Inserire la data di fine [gg/mm/yyyy]: ");
+        Date dataEnd = null;
+        try {
+            dataEnd = new SimpleDateFormat("dd/MM/yyyy").parse(sc.nextLine());
+        } catch (ParseException e) {
+            System.out.println("Formato data non valido.");
+            inserisciOrarioDesiderato();
         }
 
         System.out.print("Inserire fascia oraria: 1 = solo mattina, 2 = solo pomeriggio, 3 = mattina e pomeriggio: ");
@@ -61,7 +78,7 @@ public class handlerPrenotazione {
 
         Date dataCorrente = new Date();
         System.out.println(dataCorrente);
-        if (data.before(dataCorrente)) {
+        if (dataStart.before(dataCorrente) || dataEnd.before(dataCorrente)) {
             throw new IllegalArgumentException("Data non corretta");
         }
 
@@ -69,12 +86,13 @@ public class handlerPrenotazione {
             throw new IllegalArgumentException("Fascia oraria non corretta");
         }
 
-        prenotazioneInCorso.setData(data);
+        prenotazioneInCorso.setDataInizio(dataStart);
+        prenotazioneInCorso.setDataFine(dataEnd);
         prenotazioneInCorso.setFasciaOraria(fasciaOraria);
 
     }
 
-    public void selezionaOmbrelloneELettini() {
+    private void selezionaOmbrelloneELettini() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Inserire l'ombrellone desiderato: ");
         int idOmbrellone = sc.nextInt();
@@ -88,7 +106,7 @@ public class handlerPrenotazione {
         prenotazioneInCorso.setNumeroLettini(numLettini);
     }
 
-    public boolean controllaDisponibilità(int idOmbrellone, Date dataPrenotazione, int fasciaOrariaPrenotazione, ArrayList<Prenotazione> listaPrenotazioni) {
+    private boolean controlloOccupazione(int idOmbrellone, Date dataPrenotazione, int fasciaOrariaPrenotazione, ArrayList<Prenotazione> listaPrenotazioni) {
         for (int i = 0;i <= listaPrenotazioni.size() ; i++) {
             if (idOmbrellone == listaPrenotazioni.get(i).getId()) {
                 if (dataPrenotazione.equals(listaPrenotazioni.get(i).getData())) {
@@ -102,13 +120,13 @@ public class handlerPrenotazione {
         return false;
     }
 
-    public void confermaOperazione() {
+    private void confermaOperazione() {
         listaPrenotazioni.add(prenotazioneInCorso);
 
         inviaDatiPagamento();
     }
 
-    public void inviaDatiPagamento() {
+    private void inviaDatiPagamento() {
         //TODO: permettere l'inserimento dei dati per il pagamento
     }
 }
