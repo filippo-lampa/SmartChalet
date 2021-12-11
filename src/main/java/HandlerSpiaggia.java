@@ -9,13 +9,47 @@ public class HandlerSpiaggia {
 
     private Ombrellone ombrelloneSelezionato;
 
+    private Scanner sc;
+
     public HandlerSpiaggia(Spiaggia spiaggiaGestita, DBMSController associatedDBMS){
+        sc = new Scanner(System.in);
         this.associatedDBMS = associatedDBMS;
         this.spiaggiaGestita = spiaggiaGestita;
     }
 
     public void modificaOmbrellone(){
+        //associatedDBMS.ottieniVistaSpiaggia();
         ottieniVistaSpiaggia();
+        boolean flag = true;
+        while(flag){
+            System.out.println("Inserire l'id dell'ombrellone da modificare");
+            int idOmbrellone = sc.nextInt();
+            selezionaOmbrellone(idOmbrellone);
+            System.out.println("Digitare 1 per rimuovere l'ombrellone, 2 per spostare l'ombrellone o 3 per modificare la tipologia dell'ombrellone");
+            int op = sc.nextInt();
+            if(op == 1){
+                rimuoviOmbrellone();
+            }
+            if(op == 2){
+                Coordinate nuovaPosizione = selezionaPosto();
+                spostaOmbrellone(nuovaPosizione.xAxis, nuovaPosizione.yAxis);
+            }
+            if(op == 3){
+                modificaTipologiaOmbrellone();
+            }
+            System.out.println("Modificare altri ombrelloni? y/n" );
+            String response = sc.next();
+            flag = response.equals("y");
+        }
+        ottieniVistaSpiaggia();
+    }
+
+    private Coordinate selezionaPosto(){
+        System.out.println("Inserire la fila in cui spostare l'ombrellone");
+        int fila = sc.nextInt();
+        System.out.println("Inserire la colonna in cui spostare l'ombrellone");
+        int colonna = sc.nextInt();
+        return new Coordinate(fila, colonna);
     }
 
     private void ottieniVistaSpiaggia(){
@@ -35,7 +69,7 @@ public class HandlerSpiaggia {
         }
     }
 
-    public Ombrellone selezionaOmbrellone(int idOmbrellone){
+    private Ombrellone selezionaOmbrellone(int idOmbrellone){
         for(ArrayList<Ombrellone> currentRow : spiaggiaGestita.getListaOmbrelloni()) {
             for (Ombrellone currentOmbrellone : currentRow) {
                 if(currentOmbrellone.getIdOmbrellone() == idOmbrellone) {
@@ -47,39 +81,61 @@ public class HandlerSpiaggia {
         return null;
     }
 
-    public void rimuoviOmbrellone(){
-        for(ArrayList<Ombrellone> currentRow : spiaggiaGestita.getListaOmbrelloni()) {
-            for (Ombrellone currentOmbrellone : currentRow) {
-                if(currentOmbrellone.equals(ombrelloneSelezionato))
-                    currentRow.remove(currentOmbrellone);
-            }
+    private void rimuoviOmbrellone(){
+        System.out.println("Confermare di voler rimuovere l'ombrellone? true/false");
+        boolean opConfermata = sc.nextBoolean();
+        if(confermaOperazione(opConfermata))
+            spiaggiaGestita.rimuoviOmbrellone(ombrelloneSelezionato);
+    }
+    private Coordinate selezionaPosto(int riga, int colonna){
+        return new Coordinate(riga, colonna);
+    }
+
+    private void spostaOmbrellone(int riga, int colonna){
+        System.out.println("Confermare di voler spostare l'ombrellone? true/false");
+        boolean opConfermata = sc.nextBoolean();
+        Coordinate nuoveCoordinate = new Coordinate(riga, colonna);
+        if(confermaOperazione(opConfermata)) {
+            if (spiaggiaGestita.isLocationOccupied(nuoveCoordinate))
+                spiaggiaGestita.scambiaOmbrelloni(spiaggiaGestita.getOmbrelloneAtLocation(nuoveCoordinate), ombrelloneSelezionato);
+            else spiaggiaGestita.spostaOmbrellone(ombrelloneSelezionato, nuoveCoordinate);
+            System.out.println("Ombrellone spostato");
         }
     }
 
-    public void spostaOmbrellone(int riga, int colonna){
-        if(spiaggiaGestita.isLocationOccupied(riga, colonna))
-            spiaggiaGestita.scambiaOmbrelloni(spiaggiaGestita.getOmbrelloneAtLocation(riga, colonna), ombrelloneSelezionato);
-        else spiaggiaGestita.spostaOmbrellone(ombrelloneSelezionato, riga, colonna);
+    private void modificaTipologiaOmbrellone(){
+        ArrayList<Integer> listaTipologie = new ArrayList<>();
+        ArrayList<Integer> listaTipologieDisponibili;
+        if(ombrelloneSelezionato.isBooked())
+             listaTipologieDisponibili = controlloTipologia(ombrelloneSelezionato.getIdTipo());
+        else listaTipologieDisponibili = listaTipologie;
+        for(int i=0; i<listaTipologie.size(); i++)
+            System.out.println(listaTipologie.get(i));
+        System.out.println("Inserire la nuova tipologia dell'ombrellone");
+        int idTipologia = sc.nextInt();
+        aggiornaTipologiaOmbrellone(idTipologia);
     }
 
-    public void modificaTipologiaOmbrellone(int idTipologia){
-
+    private ArrayList<Integer> controlloTipologia(int idTipologia){
+        return null;
     }
 
-    public boolean controlloTipologia(int idTipologia){
-        return ombrelloneSelezionato.getIdTipo() == idTipologia;
+    private void aggiornaTipologiaOmbrellone(int idTipologia){
+        System.out.println("Confermare di voler aggiornare la tipologia dell'ombrellone? true/false");
+        boolean opConfermata = sc.nextBoolean();
+        if(confermaOperazione(opConfermata))
+            spiaggiaGestita.aggiornaTipologiaOmbrellone(ombrelloneSelezionato, idTipologia);
     }
 
-    public void aggiornaTipologiaOmbrellone(int idTipologia){
-        spiaggiaGestita.aggiornaTipologiaOmbrellone(ombrelloneSelezionato, idTipologia);
+    private boolean confermaOperazione (boolean operazioneConfermata){
+        return operazioneConfermata;
     }
-
 
     public static void main(String[] args) {
         Spiaggia spiaggiaTest = new Spiaggia();
         DBMSController dbmsControllerTest = new DBMSController();
         HandlerSpiaggia handlerSpiaggiaTest = new HandlerSpiaggia(spiaggiaTest, dbmsControllerTest);
-
+        handlerSpiaggiaTest.modificaOmbrellone();
     }
 
 }

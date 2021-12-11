@@ -6,8 +6,18 @@ public class Ombrellone {
     private int numeroLettiniAssociati;
     private boolean prenotato;
     private int idOmbrellone;
+    private Coordinate location;
 
-    public Ombrellone(int idTipo){
+    public void setLocation(Coordinate location) {
+        this.location = location;
+    }
+
+    public Coordinate getLocation() {
+        return location;
+    }
+
+    public Ombrellone(int idTipo, Coordinate location){
+        this.location = location;
         this.idTipo = idTipo;
         this.numeroLettiniAssociati = 0;
         this.prenotato = false;

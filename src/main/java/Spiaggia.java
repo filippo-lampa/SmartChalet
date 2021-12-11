@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Spiaggia {
@@ -19,80 +18,46 @@ public class Spiaggia {
         return this.totaleOmbrelloni;
     }
 
-    public boolean isLocationOccupied(int riga, int colonna) {
-        return listaOmbrelloni.get(riga).get(colonna) == null;
+    public boolean isLocationOccupied(Coordinate coordinate) {
+        return listaOmbrelloni.get(coordinate.getyAxis()).get(coordinate.getyAxis()) == null;
     }
 
-    public Ombrellone getOmbrelloneAtLocation(int riga, int colonna) {
-        return listaOmbrelloni.get(riga).get(colonna);
-    }
-
-    public ArrayList<Integer> getLocationOmbrellone(Ombrellone ombrellone){
-        int rowCounter = 0;
-        int columnCounter = 0;
-        ArrayList<Integer> locationOmbrellone = new ArrayList<>();
-        for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
-            for (Ombrellone currentOmbrellone : currentRow) {
-                if (currentOmbrellone.equals(ombrellone)) {
-                    locationOmbrellone.add(rowCounter);
-                    locationOmbrellone.add(columnCounter);
-                }
-                columnCounter++;
-            }
-            rowCounter++;
-        }
-        return locationOmbrellone;
+    public Ombrellone getOmbrelloneAtLocation(Coordinate location) {
+        return listaOmbrelloni.get(location.getyAxis()).get(location.getyAxis());
     }
 
     public void scambiaOmbrelloni(Ombrellone primoOmbrellone, Ombrellone secondoOmbrellone) {
-        int filaPrimoOmbrellone, filaSecondoOmbrellone, colonnaPrimoOmbrellone, colonnaSecondoOmbrellone, rowCounter, columnCounter;
-        filaPrimoOmbrellone = filaSecondoOmbrellone = colonnaPrimoOmbrellone = colonnaSecondoOmbrellone = rowCounter = columnCounter = 0;
-        for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
-            for (Ombrellone currentOmbrellone : currentRow) {
-                if (currentOmbrellone.equals(primoOmbrellone)) {
-                    filaPrimoOmbrellone = rowCounter;
-                    colonnaPrimoOmbrellone = columnCounter;
-                }
-                if (currentOmbrellone.equals(secondoOmbrellone)) {
-                    filaSecondoOmbrellone = rowCounter;
-                    colonnaSecondoOmbrellone = columnCounter;
-                }
-                columnCounter++;
-            }
-            rowCounter++;
-        }
+        int filaPrimoOmbrellone = primoOmbrellone.getLocation().getxAxis();
+        int colonnaPrimoOmbrellone = primoOmbrellone.getLocation().getyAxis();
+        int filaSecondoOmbrellone = secondoOmbrellone.getLocation().getxAxis();
+        int colonnaSecondoOmbrellone = secondoOmbrellone.getLocation().getyAxis();
         listaOmbrelloni.get(filaPrimoOmbrellone).set(colonnaPrimoOmbrellone, secondoOmbrellone);
         listaOmbrelloni.get(filaSecondoOmbrellone).set(colonnaSecondoOmbrellone, primoOmbrellone);
     }
 
-    public void spostaOmbrellone(Ombrellone ombrellone, int riga, int colonna) {
-        int rowCounter = 0;
-        int columnCounter = 0;
-        for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
-            for (Ombrellone currentOmbrellone : currentRow) {
-                if (currentOmbrellone.equals(ombrellone)) {
-                    listaOmbrelloni.get(rowCounter).set(columnCounter, null);
-                }
-                columnCounter++;
-            }
-            rowCounter++;
-        }
-        listaOmbrelloni.get(riga).set(colonna, ombrellone);
+    public void spostaOmbrellone(Ombrellone ombrellone, Coordinate nuoveCoordinate) {
+        int filaOmbrellone = ombrellone.getLocation().getxAxis();
+        int colonnaOmbrellone = ombrellone.getLocation().getyAxis();
+        listaOmbrelloni.get(filaOmbrellone).set(colonnaOmbrellone, null);
+        listaOmbrelloni.get(nuoveCoordinate.getxAxis()).set(nuoveCoordinate.getyAxis(), ombrellone);
+        ombrellone.setLocation(nuoveCoordinate);
     }
 
     public void aggiornaTipologiaOmbrellone(Ombrellone ombrellone, int idTipologia) {
-        int rowCounter = 0;
-        int columnCounter = 0;
-        for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
-            for (Ombrellone currentOmbrellone : currentRow) {
-                if (currentOmbrellone.equals(ombrellone)) {
-                    listaOmbrelloni.get(rowCounter).get(columnCounter).setTipo(idTipologia);
-                }
-                columnCounter++;
-            }
-            rowCounter++;
-        }
+        int filaOmbrellone = ombrellone.getLocation().getxAxis();
+        int colonnaOmbrellone = ombrellone.getLocation().getyAxis();
+        listaOmbrelloni.get(filaOmbrellone).get(colonnaOmbrellone).setTipo(idTipologia);
     }
 
+    public void rimuoviOmbrellone(Ombrellone ombrellone){
+        for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
+            for (Ombrellone currentOmbrellone : currentRow) {
+                if(currentOmbrellone.equals(ombrellone))
+                    if(!currentOmbrellone.isBooked())
+                        currentRow.remove(currentOmbrellone);
+                    else System.out.println("Ombrellone prenotato non rimuovibile");
+            }
+        }
+    }
 
 }
