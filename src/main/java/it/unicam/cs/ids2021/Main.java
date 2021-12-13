@@ -7,7 +7,7 @@ public class Main {
         HandlerSpiaggia a = new HandlerSpiaggia();
 
         System.out.println(a.getSpiaggiaGestita().toString());
-        //System.out.println(a.getSpiaggiaGestita().getTotaleOmbrelloni());
+        System.out.println(a.getSpiaggiaGestita().getTotaleOmbrelloni());
 
         //a.aggiungiTipologiaOmbrellone();
 
