@@ -2,19 +2,19 @@ package it.unicam.cs.ids2021;
 
 public class Coordinate {
 
-    private int x;
-    private int y;
+    int xAxis;
+    int yAxis;
 
     public Coordinate(int x, int y){
-        this.x = x;
-        this.y = y;
+        this.xAxis = x;
+        this.yAxis = y;
     }
 
-    public int getX() {
-        return x;
+    public int getyAxis() {
+        return yAxis;
     }
 
-    public int getY() {
-        return y;
+    public int getxAxis() {
+        return xAxis;
     }
 }

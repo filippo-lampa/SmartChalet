@@ -4,12 +4,16 @@ import java.util.*;
 
 public class HandlerSpiaggia {
 
-    private Spiaggia spiaggiaGestita;
-
+    private final Spiaggia spiaggiaGestita;
+    private Ombrellone ombrelloneSelezionato;
+    //private final DBMSController associatedDBMS;
+    private final Scanner sc;
 
 
     public HandlerSpiaggia(){
         this.spiaggiaGestita = new Spiaggia();
+        //this.associatedDBMS = new DBMSController();
+        this.sc = new Scanner(System.in);
     }
 
     public Spiaggia getSpiaggiaGestita() {
@@ -18,47 +22,47 @@ public class HandlerSpiaggia {
 
     public void aggiungiOmbrellone() {
 
-        //TODO aggiungere chiamata a database per la mappa della spiaggia e aggiornarla
-        //this.spiaggiaGestita = new Spiaggia(); //al posto di questo, quello che ritorna dal metodo precedente da inserire
-        Ombrellone ombrelloneProvvisorio;
-        boolean continuare;
+        //this.associatedDBMS.ottieniVistaSpiaggia(); // Sistemare per metterlo nella spiaggia gestita
+        boolean flag;
         do {
-
-            ArrayList<String[]> coordinate = this.ottieniPostiOmbrelloni();
+            ArrayList<Coordinate> coordinate = this.ottieniPostiSenzaOmbrelloni();
             if(coordinate.size()==0) {
                 System.out.println("Non ci sono più posti in cui aggiungere un ombrellone");
                 break;
             }
-            String[] coordinateOmbrellone = this.selezionaPosto(coordinate);
-            Coordinate coordinateScelte = new Coordinate(Integer.parseInt(coordinateOmbrellone[0]),Integer.parseInt(coordinateOmbrellone[1]));
+            else{ //tutta questa cosa verrà sostituita con output
+                System.out.println("Coordinate posti disponibili per aggiungere ombrelloni: ");
+                int appoggio=0;
+                for (Coordinate coord: coordinate) {
+                    System.out.print("Posto "+appoggio+" : \t");
+                    if(coord == null) System.out.println("Occupato");
+                    else System.out.println(coord.getxAxis()+"\t"+ coord.getyAxis());
+                    appoggio++;
+                }
+            }
+            Coordinate coordinateScelte = this.selezionaPosto();
             int tipo = this.sceltaTipoOmbrellone();
-            ombrelloneProvvisorio = new Ombrellone(tipo,coordinateScelte);
+            this.ombrelloneSelezionato = new Ombrellone(tipo,coordinateScelte);
 
-            this.spiaggiaGestita.aggiungiOmbrellone(ombrelloneProvvisorio);
-            //this.spiaggiaGestita.getListaOmbrelloni().get(Integer.parseInt(coordinateOmbrellone[1])).set(Integer.parseInt(coordinateOmbrellone[0]),this.ombrelloneProvvisorio);
+            this.spiaggiaGestita.aggiungiOmbrellone(this.ombrelloneSelezionato);
 
-            System.out.println(this.getSpiaggiaGestita().toString());  //TODO trasformare in vista spiaggia aggiornata
+            System.out.println(this.getSpiaggiaGestita().toString());  //TODO trasformare in vista spiaggia aggiornata x output
 
             System.out.println("Vuoi aggiungere altri ombrelloni? [y/n] ");
-            Scanner sc = new Scanner(System.in);
-            continuare = Objects.equals(sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
 
-        }while(continuare);
+        }while(flag);
 
         if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
         else System.out.println("Operazioni annullate");    //modificare il caso d'uso e diagramma se vogliamo messaggio output
     }
 
-    private String[] selezionaPosto(ArrayList<String[]> coordinate) { //TODO controllare perchè l'ho modificato da come scritto sul diagramma di progetto e in più non sono sicuro
-        int i=0;
-        for (String[] coordinateOmbrellone: coordinate) {
-            System.out.println("Posto Libero "+i+": "+ Arrays.toString(coordinateOmbrellone));
-            i++;
-        }
-        System.out.println("Scegli il numero del posto: ");
-        Scanner sc = new Scanner(System.in);
-        return coordinate.get(sc.nextInt());
-
+    private Coordinate selezionaPosto(){ //TODO quando fai il merge secondo me è meglio scritto così perchè lo uso anche io il metodo
+        System.out.println("Inserire la fila dell'ombrellone da selezionare");
+        int fila = this.sc.nextInt();
+        System.out.println("Inserire la colonna dell'ombrellone da selezionare");
+        int colonna = this.sc.nextInt();
+        return new Coordinate(fila, colonna);
     }
 
     private int sceltaTipoOmbrellone() {
@@ -67,21 +71,21 @@ public class HandlerSpiaggia {
 
         //inserire filtro per le tipologie //TODO controllare se esiste ancora la cosa del filtro
 
-        System.out.println("Tipi: "); //aggiungere lista tipi
+        System.out.println("Tipi: ");
         for (ArrayList<Object> tipo: listaTipi) {
+            if (tipo.get(2) == null) continue;  //controllare come viene gestito
             System.out.println("Tipo "+tipo.get(0)+"\t"+ tipo.get(1)+"\t"+ tipo.get(2));
         }
-        Scanner sc = new Scanner(System.in); //prendi dalla lista ciò che l'utente ha inserito
 
-        return sc.nextInt();
+        return this.sc.nextInt();
     }
 
-    public void aggiungiTipologiaOmbrellone() {//TODO modificRE
-        Scanner sc = new Scanner(System.in); //prendi dalla lista ciò che l'utente ha inserito
+    public void aggiungiTipologiaOmbrellone() {//TODO modificare
+        //prendi dalla lista ciò che l'utente ha inserito
         System.out.println("Inserisci il nome della tipologia: ");
-        String nome = sc.next();
+        String nome = this.sc.next();
         System.out.println("Inserisci descrizione della tipologia: ");
-        String info = sc.next();
+        String info = this.sc.next();
         this.inserisciInformazioniTipologia(nome,info);
     }
 
@@ -90,10 +94,10 @@ public class HandlerSpiaggia {
         int contatore = 0;
 
         for (ArrayList<Object> tipo: listaTipi) {
-            if(tipo.get(1).equals(nome)) contatore++;
+            if(tipo.get(1).equals(nome)) contatore++; //ricontrollare i parametri necessari
         }
         if(contatore == 0){
-            //TODO inserire chiamata database x inserire nuova tipologia
+            //TODO inserire chiamata database x inserire nuova tipologia con moltiplicatore null
             System.out.println("La nuova tipologia è stata aggiunta");
         }
         else{   //controllare che non sono sicuro di questa cosa
@@ -103,27 +107,25 @@ public class HandlerSpiaggia {
 
     }
 
-    private boolean confermaOperazione(){
+    private boolean confermaOperazione(){ //TODO controllare x il merge
         System.out.println("Confermi l'operazione? [y/n] ");
-        Scanner sc = new Scanner(System.in);
-        return Objects.equals(sc.next().trim().toLowerCase(Locale.ROOT), "y");
+        return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
     }
 
 
-    private ArrayList<String[]> ottieniPostiOmbrelloni(){ //TODO controllare tipo di ritorno (mettere COOrdinate)
+    private ArrayList<Coordinate> ottieniPostiSenzaOmbrelloni(){
 
-        ArrayList<String[]> coordinate = new ArrayList<>();
+        ArrayList<Coordinate> coordinate = new ArrayList<>();
         int x = 0;
         int y = 0;
 
         for (ArrayList<Ombrellone> riga : this.spiaggiaGestita.getListaOmbrelloni()) {
             for (Ombrellone ombrellone : riga) {
                 if(ombrellone == null){
-                    String[] app = new String[2];
-                    app[0]= ""+x;
-                    app[1]= ""+y;
-                    coordinate.add(app);
+                    //Coordinate coordinateAppoggio = new Coordinate(x,y);
+                    coordinate.add(new Coordinate(x,y));
                 }
+                else coordinate.add(null);
                 x++;
             }
             x=0;
@@ -140,7 +142,7 @@ public class HandlerSpiaggia {
             ArrayList<Object> lista= new ArrayList<>();
             lista.add(i);
             lista.add("Nome"+i);
-            lista.add(null);
+            lista.add(1.5); //moltiplicatore costo esempio
             listaTipi.add(lista);
         }
 

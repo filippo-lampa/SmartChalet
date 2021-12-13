@@ -48,8 +48,8 @@ public class Spiaggia { //TODO da implementare quando sviluppati casi d'uso asso
 
 
     public void aggiungiOmbrellone(Ombrellone ombrellone){
-        int coordinataX = ombrellone.getCoordinate().getX();
-        int coordinataY = ombrellone.getCoordinate().getY();
+        int coordinataX = ombrellone.getCoordinate().getxAxis();
+        int coordinataY = ombrellone.getCoordinate().getyAxis();
         this.listaOmbrelloni.get(coordinataY).set(coordinataX,ombrellone);
 
 
