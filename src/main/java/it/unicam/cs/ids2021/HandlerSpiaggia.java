@@ -76,8 +76,12 @@ public class HandlerSpiaggia {
             if (tipo.get(2) == null) continue;  //controllare come viene gestito
             System.out.println("Tipo "+tipo.get(0)+"\t"+ tipo.get(1)+"\t"+ tipo.get(2));
         }
-
-        return this.sc.nextInt();
+        int appoggio = this.sc.nextInt();
+        while(appoggio < 0 || appoggio >= listaTipi.size()){
+            System.out.println("Il tipo cercato non è presente nella lista, riprova");
+            appoggio = this.sc.nextInt();
+        }
+        return appoggio;
     }
 
     public void aggiungiTipologiaOmbrellone() {//TODO modificare
