@@ -10,7 +10,7 @@ public class Main {
         Listino listino = new Listino();
         handlerSpiaggiaTest.aggiungiTipologiaOmbrellone();
         handlerSpiaggiaTest.aggiungiOmbrellone();
-      //  handlerSpiaggiaTest.modificaOmbrellone();
+        handlerSpiaggiaTest.modificaOmbrellone();
         handlerPrenotazione.prenotaOmbrellone();
         handlerSpiaggiaTest.modificaOmbrellone();
     }
