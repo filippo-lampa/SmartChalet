@@ -1,3 +1,5 @@
+package it.unicam.ids.smartchalet.asf;
+
 public class Coordinate {
 
     int xAxis;

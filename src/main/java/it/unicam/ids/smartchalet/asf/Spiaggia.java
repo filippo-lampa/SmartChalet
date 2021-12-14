@@ -1,4 +1,8 @@
+package it.unicam.ids.smartchalet.asf;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Spiaggia {
 
@@ -7,7 +11,14 @@ public class Spiaggia {
 
     public Spiaggia(){
         this.totaleOmbrelloni = 0;
-        this.listaOmbrelloni = new ArrayList<ArrayList<Ombrellone>>();
+        this.listaOmbrelloni = new ArrayList<>();
+        for(int i=0;i<4;i++){
+            ArrayList<Ombrellone> lista= new ArrayList<>();
+            for(int j=0;j<4;j++){
+                lista.add(null);
+            }
+            listaOmbrelloni.add(lista);
+        }
     }
 
     public ArrayList<ArrayList<Ombrellone>> getListaOmbrelloni(){
@@ -19,7 +30,7 @@ public class Spiaggia {
     }
 
     public boolean isLocationOccupied(Coordinate coordinate) {
-        return listaOmbrelloni.get(coordinate.getyAxis()).get(coordinate.getyAxis()) == null;
+        return listaOmbrelloni.get(coordinate.getyAxis()).get(coordinate.getyAxis()) != null;
     }
 
     public Ombrellone getOmbrelloneAtLocation(Coordinate location) {
@@ -50,14 +61,35 @@ public class Spiaggia {
     }
 
     public void rimuoviOmbrellone(Ombrellone ombrellone){
+        Ombrellone ombrelloneDaRimuovere;
+        Ombrellone currentOmbrellone = null;
         for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
-            for (Ombrellone currentOmbrellone : currentRow) {
-                if(currentOmbrellone.equals(ombrellone))
-                    if(!currentOmbrellone.isBooked())
-                        currentRow.remove(currentOmbrellone);
-                    else System.out.println("Ombrellone prenotato non rimuovibile");
+            Iterator<Ombrellone>iter = currentRow.iterator();
+            while(iter.hasNext()) {
+                currentOmbrellone = iter.next();
+                if(currentOmbrellone != null) {
+                    if (currentOmbrellone.equals(ombrellone))
+                        if (!currentOmbrellone.isBooked()) {
+                            iter.remove();
+                            totaleOmbrelloni--;
+                        } else System.out.println("Ombrellone prenotato non rimuovibile");
+                }
             }
         }
     }
 
+    public void aggiungiOmbrellone(Ombrellone ombrellone){
+        int coordinataX = ombrellone.getLocation().getxAxis();
+        int coordinataY = ombrellone.getLocation().getyAxis();
+        this.listaOmbrelloni.get(coordinataY).set(coordinataX,ombrellone);
+        totaleOmbrelloni++;
+    }
+
+    public Ombrellone getOmbrellone(int idOmbrellone) {
+        for(ArrayList<Ombrellone> currentRow: listaOmbrelloni)
+            for(Ombrellone ombrelloneCorrente : currentRow)
+                if(ombrelloneCorrente.getIdOmbrellone() == idOmbrellone)
+                    return ombrelloneCorrente;
+                return null;
+    }
 }

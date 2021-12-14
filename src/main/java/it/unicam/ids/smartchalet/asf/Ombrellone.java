@@ -1,3 +1,5 @@
+package it.unicam.ids.smartchalet.asf;
+
 import java.util.Objects;
 
 public class Ombrellone {
@@ -16,7 +18,8 @@ public class Ombrellone {
         return location;
     }
 
-    public Ombrellone(int idTipo, Coordinate location){
+    public Ombrellone(int idTipo, Coordinate location, int idOmbrellone){
+        this.idOmbrellone = idOmbrellone;
         this.location = location;
         this.idTipo = idTipo;
         this.numeroLettiniAssociati = 0;
@@ -58,5 +61,9 @@ public class Ombrellone {
 
     public void setNumeroLettiniAssociati(int numeroLettini){
         this.numeroLettiniAssociati = numeroLettini;
+    }
+
+    public void setIsBooked(boolean prenotato) {
+        this.prenotato = prenotato;
     }
 }
