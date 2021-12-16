@@ -92,4 +92,27 @@ public class Spiaggia {
                     return ombrelloneCorrente;
                 return null;
     }
+    
+    
+    public ArrayList<Coordinate> ottieniPostiSenzaOmbrelloni(){
+
+        ArrayList<Coordinate> coordinate = new ArrayList<>();
+        int x = 0;
+        int y = 0;
+
+        for (ArrayList<Ombrellone> riga : this.getListaOmbrelloni()) {
+            for (Ombrellone ombrellone : riga) {
+                if(ombrellone == null){
+                    coordinate.add(new Coordinate(x,y));
+                }
+                else coordinate.add(null);
+                x++;
+            }
+            x=0;
+            y++;
+        }
+
+        return coordinate;
+    }
+
 }
