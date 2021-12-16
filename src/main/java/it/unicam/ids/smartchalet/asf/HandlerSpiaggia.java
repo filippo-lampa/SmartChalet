@@ -114,8 +114,8 @@ public class HandlerSpiaggia {
                     System.out.println("L'ombrellone è prenotato: " + currentOmbrellone.isBooked() + " ");
                 }
                 else System.out.println("Posizione vuota, nessun ombrellone piazzato");
+                posizioneOmbrelloneCounter++;
             }
-            posizioneOmbrelloneCounter++;
         }
     }
 
