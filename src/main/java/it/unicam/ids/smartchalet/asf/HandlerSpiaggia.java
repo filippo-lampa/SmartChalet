@@ -30,7 +30,7 @@ public class HandlerSpiaggia {
         //this.associatedDBMS.ottieniVistaSpiaggia(); // Sistemare per metterlo nella spiaggia gestita
         boolean flag;
         do {
-            ArrayList<Coordinate> coordinate = this.ottieniPostiSenzaOmbrelloni();
+            ArrayList<Coordinate> coordinate = this.spiaggiaGestita.ottieniPostiSenzaOmbrelloni();
             if(coordinate.size()==0) {
                 System.out.println("Non ci sono più posti in cui aggiungere un ombrellone");
                 break;
@@ -190,6 +190,11 @@ public class HandlerSpiaggia {
         }
         int tipo = this.sc.nextInt();
         sc.nextLine();
+        while(tipo < 0 || tipo >= listaTipi.size()){
+            System.out.println("Il tipo cercato non è presente nella lista, riprova");
+            tipo = this.sc.nextInt();
+            sc.nextLine();
+        }
         return tipo;
     }
 
@@ -233,28 +238,6 @@ public class HandlerSpiaggia {
         }
 
         return listaTipi;
-    }
-
-    private ArrayList<Coordinate> ottieniPostiSenzaOmbrelloni(){
-
-        ArrayList<Coordinate> coordinate = new ArrayList<>();
-        int x = 0;
-        int y = 0;
-
-        for (ArrayList<Ombrellone> riga : this.spiaggiaGestita.getListaOmbrelloni()) {
-            for (Ombrellone ombrellone : riga) {
-                if(ombrellone == null){
-                    //Coordinate coordinateAppoggio = new it.unicam.ids.smartchalet.asf.Coordinate(x,y);
-                    coordinate.add(new Coordinate(x,y));
-                }
-                else coordinate.add(null);
-                x++;
-            }
-            x=0;
-            y++;
-        }
-
-        return coordinate;
     }
 
 }
