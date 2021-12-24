@@ -2,6 +2,7 @@ package it.unicam.ids.smartchalet.asf;
 
 import java.util.ArrayList;
 import java.sql.*;
+import java.util.HashMap;
 
 public class DBMSController {
 
@@ -77,4 +78,15 @@ public class DBMSController {
         return null;
     }
 
+    public void aggiugniGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+        System.out.println("Nuova griglia spiaggia aggiunta al database");
+    }
+
+    public Listino ottieniListinoAggiornato() {
+        return new Listino();
+    }
+
+    public void aggiungiProdottiBar(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
+        System.out.println("Nuovi prodotti bar aggiunti al database");
+    }
 }

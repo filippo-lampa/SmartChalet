@@ -10,20 +10,21 @@ public class Ombrellone {
     private int idOmbrellone;
     private Coordinate location;
 
-    public void setLocation(Coordinate location) {
-        this.location = location;
-    }
-
-    public Coordinate getLocation() {
-        return location;
-    }
-
     public Ombrellone(int idTipo, Coordinate location, int idOmbrellone){
         this.idOmbrellone = idOmbrellone;
         this.location = location;
         this.idTipo = idTipo;
         this.numeroLettiniAssociati = 0;
         this.prenotato = false;
+    }
+
+
+    public void setLocation(Coordinate location) {
+        this.location = location;
+    }
+
+    public Coordinate getLocation() {
+        return location;
     }
 
     public int getIdTipo(){

@@ -6,19 +6,20 @@ import java.util.Iterator;
 
 public class Spiaggia {
 
-    private final ArrayList<ArrayList<Ombrellone>> listaOmbrelloni;
+    private ArrayList<ArrayList<Ombrellone>> listaOmbrelloni;
     private int totaleOmbrelloni;
 
     public Spiaggia(){
         this.totaleOmbrelloni = 0;
         this.listaOmbrelloni = new ArrayList<>();
-        for(int i=0;i<4;i++){
+        /*for(int i=0;i<4;i++){
             ArrayList<Ombrellone> lista= new ArrayList<>();
             for(int j=0;j<4;j++){
                 lista.add(null);
             }
             listaOmbrelloni.add(lista);
-        }
+        }*/
+
     }
 
     public ArrayList<ArrayList<Ombrellone>> getListaOmbrelloni(){
@@ -62,7 +63,7 @@ public class Spiaggia {
 
     public void rimuoviOmbrellone(Ombrellone ombrellone){
         Ombrellone ombrelloneDaRimuovere;
-        Ombrellone currentOmbrellone = null;
+        Ombrellone currentOmbrellone;
         for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
             Iterator<Ombrellone>iter = currentRow.iterator();
             while(iter.hasNext()) {
@@ -90,6 +91,32 @@ public class Spiaggia {
             for(Ombrellone ombrelloneCorrente : currentRow)
                 if(ombrelloneCorrente.getIdOmbrellone() == idOmbrellone)
                     return ombrelloneCorrente;
-                return null;
+        return null;
+    }
+
+
+    public ArrayList<Coordinate> ottieniPostiSenzaOmbrelloni(){
+
+        ArrayList<Coordinate> coordinate = new ArrayList<>();
+        int x = 0;
+        int y = 0;
+
+        for (ArrayList<Ombrellone> riga : this.getListaOmbrelloni()) {
+            for (Ombrellone ombrellone : riga) {
+                if(ombrellone == null){
+                    coordinate.add(new Coordinate(x,y));
+                }
+                else coordinate.add(null);
+                x++;
+            }
+            x=0;
+            y++;
+        }
+
+        return coordinate;
+    }
+
+    public void aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+        this.listaOmbrelloni = grigliaSpiaggia;
     }
 }

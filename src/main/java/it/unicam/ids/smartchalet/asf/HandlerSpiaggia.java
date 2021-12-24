@@ -30,7 +30,7 @@ public class HandlerSpiaggia {
         //this.associatedDBMS.ottieniVistaSpiaggia(); // Sistemare per metterlo nella spiaggia gestita
         boolean flag;
         do {
-            ArrayList<Coordinate> coordinate = this.ottieniPostiSenzaOmbrelloni();
+            ArrayList<Coordinate> coordinate = this.spiaggiaGestita.ottieniPostiSenzaOmbrelloni();
             if(coordinate.size()==0) {
                 System.out.println("Non ci sono più posti in cui aggiungere un ombrellone");
                 break;
@@ -91,6 +91,29 @@ public class HandlerSpiaggia {
         ottieniVistaSpiaggia();
     }
 
+    public void aggiungiGrigliaSpiaggia(){
+        System.out.println("Inserire il numero di file della spiaggia");
+        int numeroFile = sc.nextInt();
+        sc.nextLine();
+        ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia = new ArrayList<>();
+        int numeroElementiFila;
+        for(int i=0; i<numeroFile; i++) {
+            System.out.println("Inserire il numero di elementi della fila numero " + (i+1));
+            numeroElementiFila = sc.nextInt();
+            sc.nextLine();
+            ArrayList<Ombrellone> listaElementiFilaCorrente = new ArrayList<>();
+            for(int j=0; j<numeroElementiFila; j++){
+                listaElementiFilaCorrente.add(null);
+            }
+            grigliaSpiaggia.add(listaElementiFilaCorrente);
+        }
+        if(this.confermaOperazione()) {
+            this.spiaggiaGestita.aggiungiGrigliaSpiaggia(grigliaSpiaggia);
+            this.associatedDBMS.aggiugniGrigliaSpiaggia(grigliaSpiaggia);
+        }
+    }
+
+
     private Coordinate selezionaPosto(){
         System.out.println("Inserire la fila");
         int fila = this.sc.nextInt();
@@ -101,7 +124,7 @@ public class HandlerSpiaggia {
         return new Coordinate(fila, colonna);
     }
 
-     void ottieniVistaSpiaggia(){
+    void ottieniVistaSpiaggia(){
         ArrayList<ArrayList<Ombrellone>> vistaSpiaggiaCorrente = spiaggiaGestita.getListaOmbrelloni();
         int posizioneOmbrelloneCounter = 0;
         for(ArrayList<Ombrellone> currentRow : vistaSpiaggiaCorrente) {
@@ -114,8 +137,8 @@ public class HandlerSpiaggia {
                     System.out.println("L'ombrellone è prenotato: " + currentOmbrellone.isBooked() + " ");
                 }
                 else System.out.println("Posizione vuota, nessun ombrellone piazzato");
+                posizioneOmbrelloneCounter++;
             }
-            posizioneOmbrelloneCounter++;
         }
     }
 
@@ -190,6 +213,11 @@ public class HandlerSpiaggia {
         }
         int tipo = this.sc.nextInt();
         sc.nextLine();
+        while(tipo < 0 || tipo >= listaTipi.size()){
+            System.out.println("Il tipo cercato non è presente nella lista, riprova");
+            tipo = this.sc.nextInt();
+            sc.nextLine();
+        }
         return tipo;
     }
 
@@ -197,7 +225,7 @@ public class HandlerSpiaggia {
         ArrayList<Integer> listaTipologie = new ArrayList<>();
         ArrayList<Integer> listaTipologieDisponibili;
         if(ombrelloneSelezionato.isBooked())
-             listaTipologieDisponibili = controlloTipologia(ombrelloneSelezionato.getIdTipo());
+            listaTipologieDisponibili = controlloTipologia(ombrelloneSelezionato.getIdTipo());
         else listaTipologieDisponibili = listaTipologie;
         for(int i=0; i<listaTipologie.size(); i++)
             System.out.println(listaTipologie.get(i));
@@ -217,7 +245,7 @@ public class HandlerSpiaggia {
             spiaggiaGestita.aggiornaTipologiaOmbrellone(ombrelloneSelezionato, idTipologia);
     }
 
-    private boolean confermaOperazione(){ //TODO controllare x il merge
+    private boolean confermaOperazione(){
         System.out.println("Confermi l'operazione? [y/n] ");
         return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
     }
@@ -233,28 +261,6 @@ public class HandlerSpiaggia {
         }
 
         return listaTipi;
-    }
-
-    private ArrayList<Coordinate> ottieniPostiSenzaOmbrelloni(){
-
-        ArrayList<Coordinate> coordinate = new ArrayList<>();
-        int x = 0;
-        int y = 0;
-
-        for (ArrayList<Ombrellone> riga : this.spiaggiaGestita.getListaOmbrelloni()) {
-            for (Ombrellone ombrellone : riga) {
-                if(ombrellone == null){
-                    //Coordinate coordinateAppoggio = new it.unicam.ids.smartchalet.asf.Coordinate(x,y);
-                    coordinate.add(new Coordinate(x,y));
-                }
-                else coordinate.add(null);
-                x++;
-            }
-            x=0;
-            y++;
-        }
-
-        return coordinate;
     }
 
 }
