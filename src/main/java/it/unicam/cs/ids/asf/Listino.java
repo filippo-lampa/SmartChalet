@@ -13,7 +13,7 @@ public class Listino {
         return subTotale;
     }
 
-    public void getPrezzi() {
+    public void ottieniPrezzi() {
 
     }
 
