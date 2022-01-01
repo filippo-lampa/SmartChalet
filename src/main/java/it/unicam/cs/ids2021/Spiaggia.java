@@ -1,13 +1,16 @@
 package it.unicam.cs.ids2021;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class Spiaggia { //TODO da implementare quando sviluppati casi d'uso associati e database
+public class Spiaggia {
 
     private final ArrayList<ArrayList<Ombrellone>> listaOmbrelloni;
+    private int totaleOmbrelloni;
 
-    public Spiaggia (){ //TODO modificare, l'ho creato così solo per testare
-        listaOmbrelloni = new ArrayList<>();
+    public Spiaggia(){
+        this.totaleOmbrelloni = 0;
+        this.listaOmbrelloni = new ArrayList<>();
         for(int i=0;i<4;i++){
             ArrayList<Ombrellone> lista= new ArrayList<>();
             for(int j=0;j<4;j++){
@@ -17,45 +20,114 @@ public class Spiaggia { //TODO da implementare quando sviluppati casi d'uso asso
         }
     }
 
-    public ArrayList<ArrayList<Ombrellone>> getListaOmbrelloni() {
+    public ArrayList<ArrayList<Ombrellone>> getListaOmbrelloni(){
         return this.listaOmbrelloni;
     }
 
-    public int getTotaleOmbrelloni() {
-        int contatore = 0;
-        for (ArrayList<Ombrellone> riga :listaOmbrelloni) {
-            for (Ombrellone ombrellone : riga) {
-                if(ombrellone == null) ;
-                else contatore++;
+    public int getTotaleOmbrelloni(){
+        return this.totaleOmbrelloni;
+    }
+
+    public boolean isLocationOccupied(Coordinate coordinate) {
+        return listaOmbrelloni.get(coordinate.getyAxis()).get(coordinate.getyAxis()) != null;
+    }
+
+    public Ombrellone getOmbrelloneAtLocation(Coordinate location) {
+        return listaOmbrelloni.get(location.getyAxis()).get(location.getyAxis());
+    }
+
+    public void scambiaOmbrelloni(Ombrellone primoOmbrellone, Ombrellone secondoOmbrellone) {
+        int filaPrimoOmbrellone = primoOmbrellone.getLocation().getxAxis();
+        int colonnaPrimoOmbrellone = primoOmbrellone.getLocation().getyAxis();
+        int filaSecondoOmbrellone = secondoOmbrellone.getLocation().getxAxis();
+        int colonnaSecondoOmbrellone = secondoOmbrellone.getLocation().getyAxis();
+        listaOmbrelloni.get(filaPrimoOmbrellone).set(colonnaPrimoOmbrellone, secondoOmbrellone);
+        listaOmbrelloni.get(filaSecondoOmbrellone).set(colonnaSecondoOmbrellone, primoOmbrellone);
+    }
+
+    public void spostaOmbrellone(Ombrellone ombrellone, Coordinate nuoveCoordinate) {
+        int filaOmbrellone = ombrellone.getLocation().getxAxis();
+        int colonnaOmbrellone = ombrellone.getLocation().getyAxis();
+        listaOmbrelloni.get(filaOmbrellone).set(colonnaOmbrellone, null);
+        listaOmbrelloni.get(nuoveCoordinate.getxAxis()).set(nuoveCoordinate.getyAxis(), ombrellone);
+        ombrellone.setLocation(nuoveCoordinate);
+    }
+
+    public void aggiornaTipologiaOmbrellone(Ombrellone ombrellone, int idTipologia) {
+        int filaOmbrellone = ombrellone.getLocation().getxAxis();
+        int colonnaOmbrellone = ombrellone.getLocation().getyAxis();
+        listaOmbrelloni.get(filaOmbrellone).get(colonnaOmbrellone).setTipo(idTipologia);
+    }
+
+    public void rimuoviOmbrellone(Ombrellone ombrellone){
+        Ombrellone ombrelloneDaRimuovere;
+        Ombrellone currentOmbrellone = null;
+        for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
+            Iterator<Ombrellone>iter = currentRow.iterator();
+            while(iter.hasNext()) {
+                currentOmbrellone = iter.next();
+                if(currentOmbrellone != null) {
+                    if (currentOmbrellone.equals(ombrellone)) {
+                        if (!currentOmbrellone.isBooked()) {
+                            iter.remove();
+                            totaleOmbrelloni--;
+                        } else System.out.println("Ombrellone prenotato non rimuovibile");
+                    }
+                }
             }
         }
-        return contatore;
+    }
+
+    public void aggiungiOmbrellone(Ombrellone ombrellone){
+        int coordinataX = ombrellone.getLocation().getxAxis();
+        int coordinataY = ombrellone.getLocation().getyAxis();
+        this.listaOmbrelloni.get(coordinataY).set(coordinataX,ombrellone);
+        totaleOmbrelloni++;
+    }
+
+    public Ombrellone getOmbrellone(int idOmbrellone) {
+        for(ArrayList<Ombrellone> currentRow: listaOmbrelloni)
+            for(Ombrellone ombrelloneCorrente : currentRow)
+                if(ombrelloneCorrente.getIdOmbrellone() == idOmbrellone)
+                    return ombrelloneCorrente;
+        return null;
+    }
+
+
+    public ArrayList<Coordinate> ottieniPostiSenzaOmbrelloni(){
+
+        ArrayList<Coordinate> coordinate = new ArrayList<>();
+        int x = 0;
+        int y = 0;
+
+        for (ArrayList<Ombrellone> riga : this.getListaOmbrelloni()) {
+            for (Ombrellone ombrellone : riga) {
+                if(ombrellone == null){
+                    coordinate.add(new Coordinate(x,y));
+                }
+                else coordinate.add(null);
+                x++;
+            }
+            x=0;
+            y++;
+        }
+
+        return coordinate;
     }
 
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-
-        for (int i = 0; i < this.listaOmbrelloni.size(); i++) {
-            for (int j = 0; j < this.listaOmbrelloni.get(i).size(); j++) {
-               str.append(this.listaOmbrelloni.get(i).get(j)).append("\t");
-            }
-            str.append("\n");
-        }
-        return str.toString();
+         for (int i = 0; i < this.listaOmbrelloni.size(); i++) {
+             for (int j = 0; j < this.listaOmbrelloni.get(i).size(); j++) {
+                 str.append(this.listaOmbrelloni.get(i).get(j)).append("\t");
+             }
+             str.append("\n");
+         }
+         return str.toString();
     }
 
-
-    public void aggiungiOmbrellone(Ombrellone ombrellone){
-        int coordinataX = ombrellone.getCoordinate().getxAxis();
-        int coordinataY = ombrellone.getCoordinate().getyAxis();
-        this.listaOmbrelloni.get(coordinataY).set(coordinataX,ombrellone);
-
-
+    public void aggiornaSpiaggia() {
     }
-
-
-
-
 }

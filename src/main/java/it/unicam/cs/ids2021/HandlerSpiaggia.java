@@ -1,23 +1,27 @@
 package it.unicam.cs.ids2021;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Scanner;
 
 public class HandlerSpiaggia {
 
     private final Spiaggia spiaggiaGestita;
+    private final DBMSController associatedDBMS;
     private Ombrellone ombrelloneSelezionato;
-    //private final DBMSController associatedDBMS;
-    private final Scanner sc;
+    private Listino listino;
+    private Scanner sc;
 
-
-    public HandlerSpiaggia(){
-        this.spiaggiaGestita = new Spiaggia();
-        //this.associatedDBMS = new DBMSController();
-        this.sc = new Scanner(System.in);
+    public HandlerSpiaggia(Spiaggia spiaggiaGestita, DBMSController associatedDBMS, Listino listino){
+        sc = new Scanner(System.in);
+        this.associatedDBMS = associatedDBMS;
+        this.spiaggiaGestita = spiaggiaGestita;
+        this.listino = listino;
     }
 
     public Spiaggia getSpiaggiaGestita() {
-        return this.spiaggiaGestita;
+        return spiaggiaGestita;
     }
 
     public void aggiungiOmbrellone() {
@@ -25,7 +29,7 @@ public class HandlerSpiaggia {
         //this.associatedDBMS.ottieniVistaSpiaggia(); // Sistemare per metterlo nella spiaggia gestita
         boolean flag;
         do {
-            ArrayList<Coordinate> coordinate = this.ottieniPostiSenzaOmbrelloni();
+            ArrayList<Coordinate> coordinate = this.spiaggiaGestita.ottieniPostiSenzaOmbrelloni();
             if(coordinate.size()==0) {
                 System.out.println("Non ci sono più posti in cui aggiungere un ombrellone");
                 break;
@@ -57,39 +61,104 @@ public class HandlerSpiaggia {
         else System.out.println("Operazioni annullate");    //modificare il caso d'uso e diagramma se vogliamo messaggio output
     }
 
-    private Coordinate selezionaPosto(){ //TODO quando fai il merge secondo me è meglio scritto così perchè lo uso anche io il metodo
-        System.out.println("Inserire la fila dell'ombrellone da selezionare");
+    public void modificaOmbrellone(){
+        //associatedDBMS.ottieniVistaSpiaggia();
+        ottieniVistaSpiaggia();
+        boolean flag = true;
+        while(flag){
+            System.out.println("Inserire l'id dell'ombrellone da modificare");
+            int idOmbrellone = sc.nextInt();
+            sc.nextLine();
+            selezionaOmbrellone(idOmbrellone);
+            System.out.println("Digitare 1 per rimuovere l'ombrellone, 2 per spostare l'ombrellone o 3 per modificare la tipologia dell'ombrellone");
+            int op = sc.nextInt();
+            sc.nextLine();
+            if(op == 1){
+                rimuoviOmbrellone();
+            }
+            if(op == 2){
+                Coordinate nuovaPosizione = selezionaPosto();
+                spostaOmbrellone(nuovaPosizione.getxAxis(), nuovaPosizione.getyAxis());
+            }
+            if(op == 3){
+                modificaTipologiaOmbrellone();
+            }
+            System.out.println("Modificare altri ombrelloni? y/n" );
+            String response = sc.next();
+            flag = response.equals("y");
+        }
+        ottieniVistaSpiaggia();
+    }
+
+    private Coordinate selezionaPosto(){
+        System.out.println("Inserire la fila (y)");
         int fila = this.sc.nextInt();
-        System.out.println("Inserire la colonna dell'ombrellone da selezionare");
+        sc.nextLine();
+        System.out.println("Inserire la colonna (x)");
         int colonna = this.sc.nextInt();
+        sc.nextLine();
         return new Coordinate(fila, colonna);
     }
 
-    private int sceltaTipoOmbrellone() {
-        //TODO sostituire con call database x i tipi
-        ArrayList<ArrayList<Object>> listaTipi = this.getTipi();
-
-        //inserire filtro per le tipologie //TODO controllare se esiste ancora la cosa del filtro
-
-        System.out.println("Tipi: ");
-        for (ArrayList<Object> tipo: listaTipi) {
-            if (tipo.get(2) == null) continue;  //controllare come viene gestito
-            System.out.println("Tipo "+tipo.get(0)+"\t"+ tipo.get(1)+"\t"+ tipo.get(2));
+    void ottieniVistaSpiaggia(){
+        ArrayList<ArrayList<Ombrellone>> vistaSpiaggiaCorrente = spiaggiaGestita.getListaOmbrelloni();
+        int posizioneOmbrelloneCounter = 0;
+        for(ArrayList<Ombrellone> currentRow : vistaSpiaggiaCorrente) {
+            for (Ombrellone currentOmbrellone : currentRow) {
+                System.out.println("Posizione numero: " + posizioneOmbrelloneCounter + " ");
+                if (currentOmbrellone != null) {
+                    System.out.println("Id ombrellone: " + currentOmbrellone.getIdOmbrellone());
+                    System.out.println("Tipo: " + currentOmbrellone.getIdTipo() + " ");
+                    System.out.println("Numero lettini associati: " + currentOmbrellone.getNumeroLettiniAssociati() + " ");
+                    System.out.println("L'ombrellone è prenotato: " + currentOmbrellone.isBooked() + " ");
+                }
+                else System.out.println("Posizione vuota, nessun ombrellone piazzato");
+                posizioneOmbrelloneCounter++;
+            }
         }
-        int appoggio = this.sc.nextInt();
-        while(appoggio < 0 || appoggio >= listaTipi.size()){
-            System.out.println("Il tipo cercato non è presente nella lista, riprova");
-            appoggio = this.sc.nextInt();
+    }
+
+    private Ombrellone selezionaOmbrellone(int idOmbrellone){
+        for(ArrayList<Ombrellone> currentRow : spiaggiaGestita.getListaOmbrelloni()) {
+            for (Ombrellone currentOmbrellone : currentRow) {
+                if(currentOmbrellone.getIdOmbrellone() == idOmbrellone) {
+                    ombrelloneSelezionato = currentOmbrellone;
+                    return currentOmbrellone;
+                }
+            }
         }
-        return appoggio;
+        return null;
+    }
+
+    private void rimuoviOmbrellone(){
+        if(confermaOperazione())
+            spiaggiaGestita.rimuoviOmbrellone(ombrelloneSelezionato);
+    }
+
+    private Coordinate selezionaPosto(int riga, int colonna){
+        return new Coordinate(riga, colonna);
+    }
+
+    private void spostaOmbrellone(int riga, int colonna){
+        Coordinate nuoveCoordinate = new Coordinate(riga, colonna);
+        if(confermaOperazione()) {
+            if (spiaggiaGestita.isLocationOccupied(nuoveCoordinate))
+                spiaggiaGestita.scambiaOmbrelloni(spiaggiaGestita.getOmbrelloneAtLocation(nuoveCoordinate), ombrelloneSelezionato);
+            else spiaggiaGestita.spostaOmbrellone(ombrelloneSelezionato, nuoveCoordinate);
+            System.out.println("Ombrellone spostato");
+        }
     }
 
     public void aggiungiTipologiaOmbrellone() {//TODO modificare
-        //prendi dalla lista ciò che l'utente ha inserito
+
+        this.listino.getPrezziTipologia();
+        //TODO finire
+
+
         System.out.println("Inserisci il nome della tipologia: ");
-        String nome = this.sc.next();
+        String nome = this.sc.nextLine();
         System.out.println("Inserisci descrizione della tipologia: ");
-        String info = this.sc.next();
+        String info = this.sc.nextLine();
         this.inserisciInformazioniTipologia(nome,info);
     }
 
@@ -111,34 +180,55 @@ public class HandlerSpiaggia {
 
     }
 
+    private int sceltaTipoOmbrellone() {
+        //TODO sostituire con call database x i tipi
+        ArrayList<ArrayList<Object>> listaTipi = this.getTipi();
+
+        //inserire filtro per le tipologie //TODO controllare se esiste ancora la cosa del filtro
+
+        System.out.println("Tipi: ");
+        for (ArrayList<Object> tipo: listaTipi) {
+            if (tipo.get(2) == null) continue;  //controllare come viene gestito
+            System.out.println("Tipo "+tipo.get(0)+"\t"+ tipo.get(1)+"\t"+ tipo.get(2));
+        }
+        int tipo = this.sc.nextInt();
+        sc.nextLine();
+        while(tipo < 0 || tipo >= listaTipi.size()){
+            System.out.println("Il tipo cercato non è presente nella lista, riprova");
+            tipo = this.sc.nextInt();
+            sc.nextLine();
+        }
+        return tipo;
+    }
+
+    private void modificaTipologiaOmbrellone(){
+        ArrayList<Integer> listaTipologie = new ArrayList<>();
+        ArrayList<Integer> listaTipologieDisponibili;
+        if(ombrelloneSelezionato.isBooked())
+            listaTipologieDisponibili = controlloTipologia(ombrelloneSelezionato.getIdTipo());
+        else listaTipologieDisponibili = listaTipologie;
+        for(int i=0; i<listaTipologie.size(); i++)
+            System.out.println(listaTipologie.get(i));
+        System.out.println("Inserire la nuova tipologia dell'ombrellone");
+        int idTipologia = sc.nextInt();
+        sc.nextLine();
+        aggiornaTipologiaOmbrellone(idTipologia);
+    }
+
+    private ArrayList<Integer> controlloTipologia(int idTipologia){
+        return null;
+    }
+
+    private void aggiornaTipologiaOmbrellone(int idTipologia){
+        sc.nextLine();
+        if(confermaOperazione())
+            spiaggiaGestita.aggiornaTipologiaOmbrellone(ombrelloneSelezionato, idTipologia);
+    }
+
     private boolean confermaOperazione(){ //TODO controllare x il merge
         System.out.println("Confermi l'operazione? [y/n] ");
         return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
     }
-
-
-    private ArrayList<Coordinate> ottieniPostiSenzaOmbrelloni(){
-
-        ArrayList<Coordinate> coordinate = new ArrayList<>();
-        int x = 0;
-        int y = 0;
-
-        for (ArrayList<Ombrellone> riga : this.spiaggiaGestita.getListaOmbrelloni()) {
-            for (Ombrellone ombrellone : riga) {
-                if(ombrellone == null){
-                    //Coordinate coordinateAppoggio = new Coordinate(x,y);
-                    coordinate.add(new Coordinate(x,y));
-                }
-                else coordinate.add(null);
-                x++;
-            }
-            x=0;
-            y++;
-        }
-
-        return coordinate;
-    }
-
 
     private ArrayList<ArrayList<Object>> getTipi(){ //TODO eliminare quando impostato database
         ArrayList<ArrayList<Object>> listaTipi = new ArrayList<>();
@@ -152,6 +242,5 @@ public class HandlerSpiaggia {
 
         return listaTipi;
     }
-
 
 }

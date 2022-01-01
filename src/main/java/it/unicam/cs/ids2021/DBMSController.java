@@ -1,6 +1,7 @@
 package it.unicam.cs.ids2021;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DBMSController {
     private Statement stmt = null;
@@ -9,7 +10,7 @@ public class DBMSController {
      * Costruttore che inizializza un ControllerDB
      *
      */
-    public DBMSController() {
+   /* public DBMSController() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/prova", "root", "");
@@ -20,7 +21,7 @@ public class DBMSController {
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     /**
      * Esegue una query che prevede un output
@@ -69,5 +70,12 @@ public class DBMSController {
 
     public ArrayList<ArrayList<Ombrellone>> ottieniVistaSpiaggia() {
         return null;
+    }
+
+    public ArrayList<Prenotazione> richiestaListaPrenotazioni() {
+        return null;
+    }
+
+    public void ottieniListino() {
     }
 }

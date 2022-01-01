@@ -1,51 +1,77 @@
 package it.unicam.cs.ids2021;
 
+import java.util.Objects;
+
 public class Ombrellone {
 
     private int idTipo;
     private int numeroLettiniAssociati;
     private boolean prenotato;
-    private Coordinate coordinate;
+    private int idOmbrellone;
+    private Coordinate location;
 
-    public Ombrellone(int tipo, Coordinate coordinate){
-        this.idTipo = tipo;
-        this.numeroLettiniAssociati = 0;
-        this.prenotato = false;
-        this.coordinate = coordinate;
+    public void setLocation(Coordinate location) {
+        this.location = location;
     }
 
-    public int getTipo() {
+    public Coordinate getLocation() {
+        return location;
+    }
+
+    public Ombrellone(int idTipo, Coordinate location){
+        this.idOmbrellone = idOmbrellone;
+        this.location = location;
+        this.idTipo = idTipo;
+        this.numeroLettiniAssociati = 0;
+        this.prenotato = false;
+    }
+
+    public int getIdTipo(){
         return this.idTipo;
     }
 
-    public void setTipo(int tipo) {
-        this.idTipo=tipo;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ombrellone that = (Ombrellone) o;
+        return idOmbrellone == that.idOmbrellone;
     }
 
-    public int getNumeroLettiniAssociati() {
-        return this.numeroLettiniAssociati;
+    @Override
+    public int hashCode() {
+        return Objects.hash(idOmbrellone);
     }
 
-    public void setNumeroLettiniAssociati(int numeroLettini) {
-        this.numeroLettiniAssociati=numeroLettini;
-    }
-
-    public Coordinate getCoordinate() {
-        return coordinate;
-    }
-
-    public void setCoordinate(Coordinate coordinate) {
-        this.coordinate = coordinate;
+    public int getIdOmbrellone(){
+        return this.idOmbrellone;
     }
 
     public boolean isBooked(){
         return prenotato;
     }
 
+    public int getNumeroLettiniAssociati(){
+        return this.numeroLettiniAssociati;
+    }
+
+    public void setTipo(int idTipoOmbrellone){
+        this.idTipo = idTipoOmbrellone;
+    }
+
+    public void setNumeroLettiniAssociati(int numeroLettini){
+        this.numeroLettiniAssociati = numeroLettini;
+    }
+
+    public void setIsBooked(boolean prenotato) {
+        this.prenotato = prenotato;
+    }
+
     @Override
     public String toString() {
-        return "Ombrellone{" +
-                "tipo=" + idTipo +
-                '}';
+        return "Ombrellone{" + "tipo=" + idTipo + '}';
     }
 }
+
+
+
