@@ -25,4 +25,9 @@ public class TipologiaOmbrellone {
     public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
     }
+
+    @Override
+    public String toString() {
+        return "[" + nome + ": '" + descrizione + '\'' + ']';
+    }
 }

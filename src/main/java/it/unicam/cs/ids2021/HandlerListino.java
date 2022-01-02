@@ -32,6 +32,9 @@ public class HandlerListino {
 
     }
 
+    /**
+     * Questo metodo serve a modificare una fascia di prezzo esistente
+     */
     public void modificaFasciaDiPrezzo(){
         this.dbmsController.ottieniVistaSpiaggia();
         this.spiaggia.aggiornaSpiaggia();
@@ -58,7 +61,7 @@ public class HandlerListino {
         }while(flag);
 
         if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
-        else System.out.println("Operazioni annullate");    //modificare il caso d'uso e diagramma se vogliamo messaggio output
+        else System.out.println("Operazioni annullate");
     }
 
     private FasciaDiPrezzo selezioneFascia(HashMap<FasciaDiPrezzo, Double> fasce){
@@ -126,6 +129,12 @@ public class HandlerListino {
         System.out.println("Inserisci la nuova ultima locazione");
         fasciaTemporanea.setCoordinateFine(this.selezionaPosto());
 
+        //TODO inserire controllo attraverso la griglia per controllare se le coordinate sono presenti
+        if(!this.controlloCoordinate(fasciaTemporanea)) {
+            System.out.println("Le coordinate dell'inizio dela fascia si trovano dopo la sua fine, l'operazione non verrà eseguita");
+            return;
+        }
+
         if(controlloLocazioni(fasciaDaModificare,fasciaTemporanea)) this.listinoGestito.modificaLocazioniFascia(fasciaDaModificare,fasciaTemporanea);
         else System.out.println("La fascia con le nuove locazioni si sovrappone ad un'altra, l'operazione non verrà eseguita");
     }
@@ -153,21 +162,21 @@ public class HandlerListino {
 
         for ( FasciaDiPrezzo fasciaAttuale : this.listinoGestito.getPrezziFascia().keySet()) {
             if(fasciaAttuale == fasciaDaModificare) continue;
-            int yPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getyAxis();
-            int xPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getxAxis();
-            int yUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getyAxis();
-            int xUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getxAxis();
-            int yPrimoAttuale = fasciaAttuale.getCoordinateInizio().getyAxis();
-            int xPrimoAttuale = fasciaAttuale.getCoordinateInizio().getxAxis();
-            int yUltimoAttuale = fasciaAttuale.getCoordinateFine().getyAxis();
-            int xUltimoAttuale = fasciaAttuale.getCoordinateFine().getxAxis();
 
-            if(yPrimoTemporanea > yUltimoAttuale || (yPrimoTemporanea == yUltimoAttuale && xPrimoTemporanea > xUltimoAttuale) ||
-                    yUltimoTemporanea < yPrimoAttuale || (yUltimoTemporanea == yPrimoAttuale && xUltimoTemporanea < xPrimoAttuale)){
-                continue;
-            }
+            FasciaDiPrezzo appoggio1  = new FasciaDiPrezzo("Temporanea1", fasciaAttuale.getCoordinateFine(),fasciaTemporanea.getCoordinateInizio());
+            FasciaDiPrezzo appoggio2  = new FasciaDiPrezzo("Temporanea2",fasciaTemporanea.getCoordinateFine(),fasciaAttuale.getCoordinateInizio());
+            if(this.controlloCoordinate(appoggio1) || this.controlloCoordinate(appoggio2)) continue;
+
             return false;
         }
         return true;
+    }
+
+    private boolean controlloCoordinate(FasciaDiPrezzo fasciaTemporanea) {
+        int yPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getyAxis();
+        int xPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getxAxis();
+        int yUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getyAxis();
+        int xUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getxAxis();
+        return yPrimoTemporanea < yUltimoTemporanea || (yPrimoTemporanea == yUltimoTemporanea && xPrimoTemporanea < xUltimoTemporanea);
     }
 }

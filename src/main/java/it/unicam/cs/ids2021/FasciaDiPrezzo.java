@@ -43,10 +43,6 @@ public class FasciaDiPrezzo {
 
     @Override
     public String toString() {
-        return "FasciaDiPrezzo{" +
-                "nome='" + nome + '\'' +
-                ", coordinateInizio=" + coordinateInizio +
-                ", coordinateFine" + coordinateFine +
-                '}';
+        return "{"+ nome + '\'' + ", Inizio: " + coordinateInizio + ", Fine: " + coordinateFine + '}';
     }
 }

@@ -1,9 +1,6 @@
 package it.unicam.cs.ids2021;
 
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 public class HandlerSpiaggia {
 
@@ -24,9 +21,11 @@ public class HandlerSpiaggia {
         return spiaggiaGestita;
     }
 
+    /**
+     * Questo metodo serve ad aggiungere un ombrellone alla Spiaggia
+     */
     public void aggiungiOmbrellone() {
-
-        //this.associatedDBMS.ottieniVistaSpiaggia(); // Sistemare per metterlo nella spiaggia gestita
+        //this.associatedDBMS.ottieniVistaSpiaggia(); // Sistemare per aggiornare la spiaggia gestita
         boolean flag;
         do {
             ArrayList<Coordinate> coordinate = this.spiaggiaGestita.ottieniPostiSenzaOmbrelloni();
@@ -34,33 +33,24 @@ public class HandlerSpiaggia {
                 System.out.println("Non ci sono più posti in cui aggiungere un ombrellone");
                 break;
             }
-            else{ //tutta questa cosa verrà sostituita con output
-                System.out.println("Coordinate posti disponibili per aggiungere ombrelloni: ");
-                int appoggio=0;
-                for (Coordinate coord: coordinate) {
-                    System.out.print("Posto "+appoggio+" : \t");
-                    if(coord == null) System.out.println("Occupato");
-                    else System.out.println(coord.getxAxis()+"\t"+ coord.getyAxis());
-                    appoggio++;
-                }
-            }
-            Coordinate coordinateScelte = this.selezionaPosto();
-            int tipo = this.sceltaTipoOmbrellone();
-            this.ombrelloneSelezionato = new Ombrellone(tipo,coordinateScelte);
+            else this.outputListaCoordinate(coordinate);
 
-            this.spiaggiaGestita.aggiungiOmbrellone(this.ombrelloneSelezionato);
+            if(!this.aggiuntaAllaSpiaggia()) break;
 
-            System.out.println(this.getSpiaggiaGestita().toString());  //TODO trasformare in vista spiaggia aggiornata x output
+            System.out.println(this.getSpiaggiaGestita().toString());
 
             System.out.println("Vuoi aggiungere altri ombrelloni? [y/n] ");
             flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
-
+            this.sc.nextLine();
         }while(flag);
 
         if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
-        else System.out.println("Operazioni annullate");    //modificare il caso d'uso e diagramma se vogliamo messaggio output
+        else System.out.println("Operazioni annullate");
     }
 
+    /**
+     * Questo metodo serve a modificare un ombrellone creato precedentemente
+     */
     public void modificaOmbrellone(){
         //associatedDBMS.ottieniVistaSpiaggia();
         ottieniVistaSpiaggia();
@@ -100,7 +90,7 @@ public class HandlerSpiaggia {
         return new Coordinate(fila, colonna);
     }
 
-    void ottieniVistaSpiaggia(){
+    private void ottieniVistaSpiaggia(){
         ArrayList<ArrayList<Ombrellone>> vistaSpiaggiaCorrente = spiaggiaGestita.getListaOmbrelloni();
         int posizioneOmbrelloneCounter = 0;
         for(ArrayList<Ombrellone> currentRow : vistaSpiaggiaCorrente) {
@@ -149,56 +139,84 @@ public class HandlerSpiaggia {
         }
     }
 
-    public void aggiungiTipologiaOmbrellone() {//TODO modificare
+    /**
+     * Questo metodo serve ad aggiungere una tipologia di ombrellone
+     */
+    public void aggiungiTipologiaOmbrellone() {
 
-        this.listino.getPrezziTipologia();
-        //TODO finire
+        HashMap<TipologiaOmbrellone, Double> listaTipi = this.listino.getPrezziTipologia();
+        this.outputListaTipologie(listaTipi);
+        boolean flag;
+        do{
+            this.inserisciInformazioniTipologia(listaTipi);
 
+            listaTipi = this.listino.getPrezziTipologia();
+            this.outputListaTipologie(listaTipi);
 
-        System.out.println("Inserisci il nome della tipologia: ");
-        String nome = this.sc.nextLine();
-        System.out.println("Inserisci descrizione della tipologia: ");
-        String info = this.sc.nextLine();
-        this.inserisciInformazioniTipologia(nome,info);
+            System.out.println("Vuoi aggiungere altre tipologie? [y/n] ");
+            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            this.sc.nextLine();
+        }while(flag);
+
+        if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO aggiungere aggiornamento database
+        else System.out.println("Operazioni annullate");
     }
 
-    private void inserisciInformazioniTipologia(String nome, String info) {
-        ArrayList<ArrayList<Object>> listaTipi = this.getTipi(); //TODO controllare posizione e sostituire con call a database
-        int contatore = 0;
-
-        for (ArrayList<Object> tipo: listaTipi) {
-            if(tipo.get(1).equals(nome)) contatore++; //ricontrollare i parametri necessari
+    private void outputListaTipologie(HashMap<TipologiaOmbrellone, Double> listaTipi){
+        if(listaTipi.isEmpty()){
+            System.out.println("Al momento non ci sono tipologie salvate");
         }
-        if(contatore == 0){
-            //TODO inserire chiamata database x inserire nuova tipologia con moltiplicatore null
+        else{
+            System.out.println("Tipi: ");
+            for (TipologiaOmbrellone tipologia: listaTipi.keySet()) {
+                System.out.println(tipologia+" Moltipilicatore: "+ listaTipi.get(tipologia));
+            }
+        }
+    }
+
+    private void inserisciInformazioniTipologia(HashMap<TipologiaOmbrellone, Double> listaTipi) {
+
+        System.out.println("Inserisci il nome della nuova tipologia: ");
+        String nome = this.sc.nextLine();
+        System.out.println("Inserisci descrizione della nuova tipologia: ");
+        String info = this.sc.nextLine();
+        System.out.println("Inserisci il moltiplicatore della nuova tipologia: ");
+        double moltiplicatore = this.sc.nextDouble();
+        this.sc.nextLine();
+
+        if(!this.controlloPresenzaTipologiaInserita(listaTipi,nome)){
+            listaTipi.put(new TipologiaOmbrellone(nome,info),moltiplicatore);
             System.out.println("La nuova tipologia è stata aggiunta");
         }
-        else{   //controllare che non sono sicuro di questa cosa
+        else{
             System.out.println("La tipologia inserita è già presente!");
-            this.aggiungiTipologiaOmbrellone();
         }
 
     }
 
-    private int sceltaTipoOmbrellone() {
-        //TODO sostituire con call database x i tipi
-        ArrayList<ArrayList<Object>> listaTipi = this.getTipi();
-
-        //inserire filtro per le tipologie //TODO controllare se esiste ancora la cosa del filtro
-
-        System.out.println("Tipi: ");
-        for (ArrayList<Object> tipo: listaTipi) {
-            if (tipo.get(2) == null) continue;  //controllare come viene gestito
-            System.out.println("Tipo "+tipo.get(0)+"\t"+ tipo.get(1)+"\t"+ tipo.get(2));
+    private boolean controlloPresenzaTipologiaInserita(HashMap<TipologiaOmbrellone, Double> listaTipi , String nome){
+        if(!listaTipi.isEmpty()){
+            for (TipologiaOmbrellone tipologia: listaTipi.keySet()) {
+                if(tipologia.getNome().equals(nome)) return true;
+            }
         }
-        int tipo = this.sc.nextInt();
-        sc.nextLine();
-        while(tipo < 0 || tipo >= listaTipi.size()){
+        return false;
+    }
+
+    private String sceltaTipoOmbrellone() {
+        HashMap<TipologiaOmbrellone, Double> listaTipi = this.listino.getPrezziTipologia();
+        this.outputListaTipologie(listaTipi);
+        if(listaTipi.isEmpty()) {
+            System.out.println("Non sono state ancora aggiunte tipologie, non è possibile aggiungere un ombrellone, annullamento operazioni");
+            return null;
+        }
+        String nomeTipologia = this.sc.nextLine();
+
+        while(!this.controlloPresenzaTipologiaInserita(listaTipi,nomeTipologia)){
             System.out.println("Il tipo cercato non è presente nella lista, riprova");
-            tipo = this.sc.nextInt();
-            sc.nextLine();
+            nomeTipologia = this.sc.nextLine();
         }
-        return tipo;
+        return nomeTipologia;
     }
 
     private void modificaTipologiaOmbrellone(){
@@ -225,22 +243,28 @@ public class HandlerSpiaggia {
             spiaggiaGestita.aggiornaTipologiaOmbrellone(ombrelloneSelezionato, idTipologia);
     }
 
-    private boolean confermaOperazione(){ //TODO controllare x il merge
+    private boolean confermaOperazione(){
         System.out.println("Confermi l'operazione? [y/n] ");
         return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
     }
 
-    private ArrayList<ArrayList<Object>> getTipi(){ //TODO eliminare quando impostato database
-        ArrayList<ArrayList<Object>> listaTipi = new ArrayList<>();
-        for(int i=0;i<4;i++){
-            ArrayList<Object> lista= new ArrayList<>();
-            lista.add(i);
-            lista.add("Nome"+i);
-            lista.add(1.5); //moltiplicatore costo esempio
-            listaTipi.add(lista);
+    private void outputListaCoordinate(ArrayList<Coordinate> coordinate){
+        System.out.println("Coordinate posti disponibili per aggiungere ombrelloni: ");
+        int appoggio=0;
+        for (Coordinate coord: coordinate) {
+            System.out.print("Posto "+appoggio+" : \t");
+            if(coord == null) System.out.println("Occupato");
+            else System.out.println(coord.getxAxis()+"\t"+ coord.getyAxis());
+            appoggio++;
         }
+    }
 
-        return listaTipi;
+    private boolean aggiuntaAllaSpiaggia(){
+        Coordinate coordinateScelte = this.selezionaPosto();
+        String tipo = this.sceltaTipoOmbrellone();
+        if(tipo == null) return false;
+        this.spiaggiaGestita.aggiungiOmbrellone(new Ombrellone(1,coordinateScelte)); //TODO combiare 1 e capire la cosa degli idTipologie
+        return true;
     }
 
 }

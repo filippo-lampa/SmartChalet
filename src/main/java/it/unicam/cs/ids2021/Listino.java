@@ -5,8 +5,15 @@ import java.util.HashMap;
 public class Listino {
     private HashMap<TipologiaOmbrellone, Double> prezziTipologia;
     private HashMap<ProdottoBar, Double> prezziBar;
-    private HashMap<FasciaDiPrezzo, Double> prezziFascia = new HashMap<>();
-    private double prezzoBaseOmbrellone = 10.00;
+    private HashMap<FasciaDiPrezzo, Double> prezziFascia;
+    private double prezzoBaseOmbrellone;
+
+    public Listino() {
+        this.prezziTipologia = new HashMap<>();
+        this.prezziBar = new HashMap<>();
+        this.prezziFascia = new HashMap<>();
+        this.prezzoBaseOmbrellone = 10.00;
+    }
 
     public HashMap<TipologiaOmbrellone, Double> getPrezziTipologia() {
         return prezziTipologia;
