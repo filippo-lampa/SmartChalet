@@ -17,4 +17,9 @@ public class Coordinate {
     public int getxAxis() {
         return xAxis;
     }
+
+    @Override
+    public String toString() {
+        return "[" + xAxis + "," + yAxis + ']';
+    }
 }

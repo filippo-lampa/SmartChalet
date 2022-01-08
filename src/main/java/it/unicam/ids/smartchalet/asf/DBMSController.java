@@ -82,8 +82,8 @@ public class DBMSController {
         System.out.println("Nuova griglia spiaggia aggiunta al database");
     }
 
-    public Listino ottieniListinoAggiornato() {
-        return new Listino();
+    public void ottieniListinoAggiornato() {
+
     }
 
     public void aggiungiProdottiBar(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
