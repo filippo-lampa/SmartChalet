@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class HandlerPrenotazione {
+
     private ArrayList<Prenotazione> listaPrenotazioni;
     private Prenotazione prenotazioneInCorso;
     private final DBMSController associatedDBMS;

@@ -4,11 +4,20 @@ import java.util.Objects;
 
 public class Ombrellone {
 
-    private int idTipo;
+    private String nomeTipo;
     private int numeroLettiniAssociati;
     private boolean prenotato;
     private int idOmbrellone;
     private Coordinate location;
+
+    public Ombrellone(String nomeTipo, Coordinate location, int idOmbrellone){
+        this.idOmbrellone = idOmbrellone;
+        this.location = location;
+        this.nomeTipo = nomeTipo;
+        this.numeroLettiniAssociati = 0;
+        this.prenotato = false;
+    }
+
 
     public void setLocation(Coordinate location) {
         this.location = location;
@@ -16,18 +25,6 @@ public class Ombrellone {
 
     public Coordinate getLocation() {
         return location;
-    }
-
-    public Ombrellone(int idTipo, Coordinate location, int idOmbrellone){
-        this.idOmbrellone = idOmbrellone;
-        this.location = location;
-        this.idTipo = idTipo;
-        this.numeroLettiniAssociati = 0;
-        this.prenotato = false;
-    }
-
-    public int getIdTipo(){
-        return this.idTipo;
     }
 
     @Override
@@ -55,8 +52,12 @@ public class Ombrellone {
         return this.numeroLettiniAssociati;
     }
 
-    public void setTipo(int idTipoOmbrellone){
-        this.idTipo = idTipoOmbrellone;
+    public String getNomeTipo() {
+        return nomeTipo;
+    }
+
+    public void setTipo(String nomeTipoOmbrellone){
+        this.nomeTipo = nomeTipoOmbrellone;
     }
 
     public void setNumeroLettiniAssociati(int numeroLettini){
@@ -65,5 +66,10 @@ public class Ombrellone {
 
     public void setIsBooked(boolean prenotato) {
         this.prenotato = prenotato;
+    }
+
+    @Override
+    public String toString() {
+        return "Ombrellone{" + "tipo=" + nomeTipo + " " + "id=" + idOmbrellone + '}';
     }
 }
