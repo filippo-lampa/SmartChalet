@@ -6,12 +6,18 @@ public class Main {
         DBMSController dbmsController = new DBMSController();
         Spiaggia spiaggiaTest = new Spiaggia();
         HandlerPrenotazione handlerPrenotazione = new HandlerPrenotazione(spiaggiaTest, dbmsController);
-        HandlerSpiaggia handlerSpiaggiaTest = new HandlerSpiaggia(spiaggiaTest, dbmsController);
         Listino listino = new Listino();
+        HandlerSpiaggia handlerSpiaggiaTest = new HandlerSpiaggia(spiaggiaTest, dbmsController, listino);
+        HandlerListino handlerListino = new HandlerListino(listino, dbmsController, spiaggiaTest);
         handlerSpiaggiaTest.aggiungiTipologiaOmbrellone();
+        handlerSpiaggiaTest.aggiungiGrigliaSpiaggia();
         handlerSpiaggiaTest.aggiungiOmbrellone();
         handlerSpiaggiaTest.modificaOmbrellone();
         handlerPrenotazione.prenotaOmbrellone();
-        handlerSpiaggiaTest.modificaOmbrellone();
+        handlerListino.aggiungiProdottoBar();
+        handlerListino.modificaFasciaDiPrezzo();
+        handlerListino.aggiungiFasciaDiPrezzo();
+        handlerListino.modificaFasciaDiPrezzo();
+        handlerListino.impostaPrezziOmbrellone();
     }
 }
