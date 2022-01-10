@@ -1,17 +1,21 @@
-package it.unicam.cs.ids.asf;
+package it.unicam.ids.smartchalet.asf;
 
 public class FasciaDiPrezzo {
-    String nome;
-    int idPrimoOmbrellone;
-    int idUltimoOmbrellone;
-    final int id;
 
-    public FasciaDiPrezzo(String nome, int idPrimoOmbrellone, int idUltimoOmbrellone, int id) {
-        this.nome = nome;
-        this.idPrimoOmbrellone = idPrimoOmbrellone;
-        this.idUltimoOmbrellone = idUltimoOmbrellone;
-        this.id = id;
+    private String nome;
+    private Coordinate coordinateInizio;
+    private Coordinate coordinateFine;
+
+    public FasciaDiPrezzo(String nome){
+        this(nome,null,null);
     }
+
+    public FasciaDiPrezzo(String nome, Coordinate coordinateInizio ,Coordinate coordinateFine){
+        this.nome = nome;
+        this.coordinateInizio = coordinateInizio;
+        this.coordinateFine = coordinateFine;
+    }
+
 
     public String getNome() {
         return nome;
@@ -21,23 +25,24 @@ public class FasciaDiPrezzo {
         this.nome = nome;
     }
 
-    public int getIdPrimoOmbrellone() {
-        return idPrimoOmbrellone;
+    public Coordinate getCoordinateInizio() {
+        return this.coordinateInizio;
     }
 
-    public void setIdPrimoOmbrellone(int idPrimoOmbrellone) {
-        this.idPrimoOmbrellone = idPrimoOmbrellone;
+    public void setCoordinateInizio(Coordinate coordinateInizio) {
+        this.coordinateInizio = coordinateInizio;
     }
 
-    public int getIdUltimoOmbrellone() {
-        return idUltimoOmbrellone;
+    public Coordinate getCoordinateFine() {
+        return this.coordinateFine;
     }
 
-    public void setIdUltimoOmbrellone(int idUltimoOmbrellone) {
-        this.idUltimoOmbrellone = idUltimoOmbrellone;
+    public void setCoordinateFine(Coordinate coordinateFine) {
+        this.coordinateFine = coordinateFine;
     }
 
-    public int getId() {
-        return id;
+    @Override
+    public String toString() {
+        return "{"+ nome + '\'' + ", Inizio: " + coordinateInizio + ", Fine: " + coordinateFine + '}';
     }
 }

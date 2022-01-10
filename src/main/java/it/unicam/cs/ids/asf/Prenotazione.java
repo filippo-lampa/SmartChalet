@@ -1,4 +1,4 @@
-package it.unicam.cs.ids.asf;
+package it.unicam.ids.smartchalet.asf;
 
 import java.util.ArrayList;
 import java.util.Date;

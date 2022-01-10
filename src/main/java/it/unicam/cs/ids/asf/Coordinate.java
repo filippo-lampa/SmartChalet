@@ -1,4 +1,4 @@
-package it.unicam.cs.ids.asf;
+package it.unicam.ids.smartchalet.asf;
 
 public class Coordinate {
 
@@ -16,5 +16,10 @@ public class Coordinate {
 
     public int getxAxis() {
         return xAxis;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + xAxis + "," + yAxis + ']';
     }
 }

@@ -1,4 +1,4 @@
-package it.unicam.cs.ids.asf;
+package it.unicam.ids.smartchalet.asf;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class HandlerPrenotazione {
+
     private ArrayList<Prenotazione> listaPrenotazioni;
     private Prenotazione prenotazioneInCorso;
     private final DBMSController associatedDBMS;
@@ -67,6 +68,7 @@ public class HandlerPrenotazione {
         } catch (ParseException e) {
             System.out.println("Formato data non valido.");
             inserisciOrarioDesiderato();
+
         }
 
         System.out.print("Inserire la data di fine [gg/mm/yyyy]: ");
