@@ -5,11 +5,8 @@ import java.util.*;
 public class HandlerListino {
 
     private Listino listinoGestito;
-
     private final DBMSController associatedDBMS;
-
     private Scanner sc;
-
     private Spiaggia spiaggia;
 
     public HandlerListino(Listino listinoGestito, DBMSController associatedDBMS, Spiaggia spiaggiaAssociata) {

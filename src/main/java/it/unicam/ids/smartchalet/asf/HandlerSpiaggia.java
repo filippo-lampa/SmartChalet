@@ -115,7 +115,7 @@ public class HandlerSpiaggia {
         return new Coordinate(fila, colonna);
     }
 
-    private void ottieniVistaSpiaggia(){
+    public void ottieniVistaSpiaggia(){
         ArrayList<ArrayList<Ombrellone>> vistaSpiaggiaCorrente = spiaggiaGestita.getListaOmbrelloni();
         int posizioneOmbrelloneCounter = 0;
         for(ArrayList<Ombrellone> currentRow : vistaSpiaggiaCorrente) {
