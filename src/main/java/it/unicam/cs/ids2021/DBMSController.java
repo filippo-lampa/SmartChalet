@@ -76,6 +76,21 @@ public class DBMSController {
         return null;
     }
 
-    public void ottieniListino() {
+    public void aggiugniGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+        System.out.println("Nuova griglia spiaggia aggiunta al database");
+    }
+
+    public void ottieniListinoAggiornato() {
+
+    }
+
+    public void aggiungiProdottiBar(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
+        System.out.println("Nuovi prodotti bar aggiunti al database");
+    }
+
+    public void ottieniListaAttivita() {
+    }
+
+    public void ottieniListaAttrezzature() {
     }
 }
