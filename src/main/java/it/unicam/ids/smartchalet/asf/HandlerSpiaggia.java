@@ -42,8 +42,7 @@ public class HandlerSpiaggia {
             System.out.println(this.getSpiaggiaGestita().toString());
 
             System.out.println("Vuoi aggiungere altri ombrelloni? [y/n] ");
-            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
-            this.sc.nextLine();
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }while(flag);
 
         if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
@@ -76,7 +75,7 @@ public class HandlerSpiaggia {
                 modificaTipologiaOmbrellone(ombrelloneSelezionato);
             }
             System.out.println("Modificare altri ombrelloni? y/n" );
-            String response = sc.next();
+            String response = sc.nextLine();
             flag = response.equals("y");
         }
         ottieniVistaSpiaggia();
@@ -100,7 +99,7 @@ public class HandlerSpiaggia {
         }
         if(this.confermaOperazione()) {
             this.spiaggiaGestita.aggiungiGrigliaSpiaggia(grigliaSpiaggia);
-            this.associatedDBMS.aggiugniGrigliaSpiaggia(grigliaSpiaggia);
+            this.associatedDBMS.aggiungiGrigliaSpiaggia(grigliaSpiaggia);
         }
     }
 
@@ -198,8 +197,7 @@ public class HandlerSpiaggia {
             this.listinoAssociato.outputListaTipologie();
 
             System.out.println("Vuoi aggiungere altre tipologie? [y/n] ");
-            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
-            this.sc.nextLine();
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }while(flag);
 
         if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO aggiungere aggiornamento database
@@ -320,7 +318,137 @@ public class HandlerSpiaggia {
 
     private boolean confermaOperazione(){
         System.out.println("Confermi l'operazione? [y/n] ");
-        return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+        return Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
+    }
+
+    public void modificaGrigliaSpiaggia(){
+
+        this.associatedDBMS.ottieniVistaSpiaggia();
+        //this.spiaggiaGestita.aggiornaSpiaggia();
+        System.out.println(this.spiaggiaGestita.toString());
+        ArrayList<ArrayList<Ombrellone>> listaOmbrelloni = this.spiaggiaGestita.getListaOmbrelloni();
+
+        boolean flag;
+        do {
+            this.sceltaModificaGriglia(listaOmbrelloni);
+            listaOmbrelloni = this.spiaggiaGestita.getListaOmbrelloni();
+
+            System.out.println("Vuoi modificare ancora la griglia spiaggia? [y/n] ");
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
+        }while(flag);
+
+        if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
+        else System.out.println("Operazioni annullate");
+    }
+
+    private void sceltaModificaGriglia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        System.out.println("Seleziona la riga che vuoi modificare (int)");
+        int sceltaRiga = this.provaScannerInt();
+        int sceltaOperazione = this.sceltaOperazioneModificaGriglia();
+        if(sceltaOperazione == 1){
+            this.allungamentoRiga(listaOmbrelloni.get(sceltaRiga));
+        }
+        if(sceltaOperazione == 2){
+            this.accorciamentoRiga(listaOmbrelloni.get(sceltaRiga));
+        }
+        if(sceltaOperazione == 3){
+            this.eliminazioneRiga(listaOmbrelloni,sceltaRiga);
+        }
+
+        System.out.println(this.spiaggiaGestita.toString());
+    }
+
+
+    private void accorciamentoRiga(ArrayList<Ombrellone> riga) {
+        System.out.println("Scegli di quanto accorciare la riga (int)");
+        int lunghezzaAccorciamento = this.provaScannerInt();
+        String direzione = this.sceltaDirezioneOperazione("accorciare");
+
+        if(lunghezzaAccorciamento >= riga.size()){
+            System.out.println("Stai cercando di accorciare troppo la riga, l'operazione verrà annullata");
+            return;
+        }
+
+        if(this.isParteRigaEmpty(riga,lunghezzaAccorciamento,direzione)){
+            if(Objects.equals(direzione, "d")) for(int i=0;i<lunghezzaAccorciamento;i++) riga.remove(riga.get(riga.size()-1));
+            else for(int i=0;i<lunghezzaAccorciamento;i++) riga.remove(0);
+        }
+        else System.out.println("Impossibile accorciare la riga perchè almeno un ombrellone è presente");
+
+    }
+
+    private boolean isParteRigaEmpty(ArrayList<Ombrellone> riga, int lunghezzaAccorciamento, String direzione){
+        ArrayList<Ombrellone> parteRiga = new ArrayList<>();
+
+        if(Objects.equals(direzione, "d"))
+            for(int i=0;i<lunghezzaAccorciamento;i++) parteRiga.add(riga.get(riga.size()-1-i));
+        else
+            for(int i=0;i<lunghezzaAccorciamento;i++) parteRiga.add(riga.get(i));
+
+        for(Ombrellone ombrellone : parteRiga){
+            if(ombrellone != null) return false;
+        }
+        return true;
+    }
+
+    private void eliminazioneRiga(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni, int sceltaRiga) {
+        if(this.confermaOperazione()) {
+            if (this.isRigaEmpty(listaOmbrelloni.get(sceltaRiga))) {
+                listaOmbrelloni.remove(sceltaRiga);
+            }
+            else System.out.println("La fila non può essere eliminata poichè contiene almeno un ombrellone");
+        }
+    }
+
+    private boolean isRigaEmpty(ArrayList<Ombrellone> riga){
+        for(Ombrellone ombrellone : riga){
+            if(ombrellone != null) return false;
+        }
+        return true;
+    }
+
+    private void allungamentoRiga(ArrayList<Ombrellone> riga) {
+        System.out.println("Scegli di quanto allungare la riga (int)");
+        int lunghezzaAllungamento = this.provaScannerInt();
+        String direzione = this.sceltaDirezioneOperazione("allungare");
+
+        if(Objects.equals(direzione, "d")) for(int i=0;i<lunghezzaAllungamento;i++) riga.add(null);
+        else for(int i=0;i<lunghezzaAllungamento;i++) riga.add(0,null);
+    }
+
+    private String sceltaDirezioneOperazione(String operazione){
+        String direzione;
+        while(true){
+            System.out.println("Scegli la direzione in cui "+ operazione +" la riga [d/s]");
+            direzione = this.sc.nextLine().trim().toLowerCase(Locale.ROOT);
+            if(Objects.equals(direzione, "d") || Objects.equals(direzione, "s")) return direzione;
+            else System.out.println("Cio' che hai inserito non e' accettabile, ritenta");
+        }
+
+    }
+
+    private int sceltaOperazioneModificaGriglia(){
+        do{
+            System.out.println("Scegli l'operazione da eseguire sulla riga (int)");
+            System.out.println("1\tAllungare la riga\n2\tAccorciare la riga\n3\tEliminare la riga ");
+            int sceltaOperazione = this.provaScannerInt();
+            if(sceltaOperazione==1 || sceltaOperazione==2 || sceltaOperazione==3) return sceltaOperazione;
+            else{
+                System.out.println("Il numero inserito non rappresenta un'operazione, ritenta");
+            }
+        }while(true);
+    }
+
+    private int provaScannerInt(){
+        while(true){
+            try{
+                int intero = this.sc.nextInt();
+                this.sc.nextLine();
+                return intero;
+            } catch (Exception e) {
+                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
+            }
+        }
     }
 
 }

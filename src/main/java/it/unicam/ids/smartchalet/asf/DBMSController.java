@@ -78,7 +78,7 @@ public class DBMSController {
         return null;
     }
 
-    public void aggiugniGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+    public void aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
         System.out.println("Nuova griglia spiaggia aggiunta al database");
     }
 
@@ -88,5 +88,29 @@ public class DBMSController {
 
     public void aggiungiProdottiBar(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
         System.out.println("Nuovi prodotti bar aggiunti al database");
+    }
+
+
+    public HashMap<Attrezzatura, Integer> ottieniAttrezzatureAggiornate() {
+        return null;
+    }
+
+    public HashMap<Attrezzatura, Integer> ottieniMappaAttrezzature(){
+        Attrezzatura sdraio = new Attrezzatura("Sdraio", "Roba su cui ci si sdraia");
+        Attrezzatura posacenere = new Attrezzatura("Posacenere", "Roba in cui si cicca");
+
+        HashMap<Attrezzatura, Integer> listaAttrezzaturaTest = new HashMap<>();
+        listaAttrezzaturaTest.put(sdraio, 10);
+        listaAttrezzaturaTest.put(posacenere, 5);
+
+        return listaAttrezzaturaTest;
+
+    }
+
+    public void aggiornaMappaAttrezzature(HashMap<Attrezzatura, Integer> mappaAttrezzatura) {
+    }
+
+    public ArrayList<Attivita> ottieniListaAttivita() {
+        return null;
     }
 }

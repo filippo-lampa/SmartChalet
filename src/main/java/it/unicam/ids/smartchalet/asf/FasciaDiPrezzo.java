@@ -5,6 +5,7 @@ public class FasciaDiPrezzo {
     private String nome;
     private Coordinate coordinateInizio;
     private Coordinate coordinateFine;
+    private int id; //TODO
 
     public FasciaDiPrezzo(String nome){
         this(nome,null,null);
