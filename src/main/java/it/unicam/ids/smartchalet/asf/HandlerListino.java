@@ -21,6 +21,7 @@ public class HandlerListino {
     public void aggiungiProdottoBar() {
         //this.listinoGestito.aggiornaListino(); //TODO richiedere listino aggiornato al database
         boolean flag;
+        mostraListinoBar();
         do {
             System.out.println("Inserire nome prodotto");
             String nomeProdotto = sc.nextLine();
@@ -28,20 +29,20 @@ public class HandlerListino {
             String descrizioneProdotto = sc.nextLine();
             System.out.println("Inserire prezzo prodotto");
             Double prezzoProdotto = sc.nextDouble();
+            this.sc.nextLine();
             ProdottoBar nuovoProdottoBar = new ProdottoBar(descrizioneProdotto, nomeProdotto);
             if (!this.listinoGestito.controlloProdottoEsistente(nuovoProdottoBar)) {
                 this.listinoGestito.aggiungiAllaListaProdotti(nuovoProdottoBar, prezzoProdotto);
             } else {
                 System.out.println("Il prodotto non può essere aggiunto poichè già presente nel listino");
             }
+            mostraListinoBar();
             System.out.println("Vuoi aggiungere altri prodotti? [y/n] ");
-            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
-            sc.nextLine();
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         } while (flag);
         if (this.confermaOperazione()) {
-            HashMap<ProdottoBar, Double> listinoBarAggiornato = this.listinoGestito.ottieniListinoBar();
+            HashMap<ProdottoBar, Double> listinoBarAggiornato = this.listinoGestito.getPrezziBar();
             this.associatedDBMS.aggiungiProdottiBar(listinoBarAggiornato);
-            mostraListinoBar();
         }
     }
 
@@ -72,7 +73,7 @@ public class HandlerListino {
                 continue;
             }
             System.out.println("Aggiungere altre fascie di prezzo? (y/n)");
-            working = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }
         if (this.confermaOperazione()) {
             System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database//
@@ -102,12 +103,18 @@ public class HandlerListino {
 
     private boolean confermaOperazione() {
         System.out.println("Confermi l'operazione? [y/n] ");
-        return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+        return Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
     }
 
     public void mostraListinoBar() {
-        for (ProdottoBar currentProdottoBar : this.listinoGestito.ottieniListinoBar().keySet()) {
-            System.out.println(currentProdottoBar.getNomeProdotto() + ": " + this.listinoGestito.ottieniListinoBar().get(currentProdottoBar) + "€");
+        if(this.listinoGestito.getPrezziBar().isEmpty()){
+            System.out.println("Il listino bar è vuoto");
+        }
+        else {
+            System.out.println("Listino Bar: ");
+            for (ProdottoBar currentProdottoBar : this.listinoGestito.getPrezziBar().keySet()) {
+                System.out.println(currentProdottoBar.getNomeProdotto() + ": " + this.listinoGestito.getPrezziBar().get(currentProdottoBar) + "€");
+            }
         }
     }
 
@@ -128,7 +135,7 @@ public class HandlerListino {
             this.sceltaTipoModifiche(fasciaDaModificare);
             listinoGestito.mostraFasceEPrezzi();
             System.out.println("Vuoi modificare altro? [y/n] ");
-            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         } while (flag);
 
         if (this.confermaOperazione())
@@ -144,7 +151,7 @@ public class HandlerListino {
         while (working) {
             sceltaOperazione();
             System.out.println("Vuoi modificare altro? (y/n)");
-            working = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
 
         }
 
@@ -231,7 +238,7 @@ public class HandlerListino {
         boolean flag = true;
         while (flag) {
             System.out.println("Scegli una fascia di prezzo da modificare: [nome]");
-            String app = sc.next();
+            String app = sc.nextLine();
             for (FasciaDiPrezzo fasciaAttuale : this.listinoGestito.getPrezziFascia().keySet()) {
                 if (fasciaAttuale.getNome().equals(app)) {
                     fasciaDaModificare = fasciaAttuale;
