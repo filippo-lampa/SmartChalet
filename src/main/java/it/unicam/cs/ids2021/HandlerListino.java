@@ -4,23 +4,32 @@ import java.util.*;
 
 public class HandlerListino {
 
-    private Listino listinoGestito;
+    private final Listino listinoGestito;
 
     private final DBMSController associatedDBMS;
 
     private Scanner sc;
 
-    private Spiaggia spiaggia;
+    private HandlerSpiaggia handlerSpiaggiaAssociato;
 
-    public HandlerListino(Listino listinoGestito, DBMSController associatedDBMS, Spiaggia spiaggiaAssociata) {
+    public HandlerListino(Listino listinoGestito, DBMSController associatedDBMS) {
         sc = new Scanner(System.in);
         this.listinoGestito = listinoGestito;
         this.associatedDBMS = associatedDBMS;
     }
 
+    public void setHandlerSpiaggiaAssociato(HandlerSpiaggia handlerSpiaggiaAssociato) {
+        this.handlerSpiaggiaAssociato = handlerSpiaggiaAssociato;
+    }
+
+    public Listino getListinoGestito() {
+        return listinoGestito;
+    }
+
     public void aggiungiProdottoBar() {
         //this.listinoGestito.aggiornaListino(); //TODO richiedere listino aggiornato al database
         boolean flag;
+        this.mostraListinoBar();
         do {
             System.out.println("Inserire nome prodotto");
             String nomeProdotto = sc.nextLine();
@@ -28,22 +37,108 @@ public class HandlerListino {
             String descrizioneProdotto = sc.nextLine();
             System.out.println("Inserire prezzo prodotto");
             Double prezzoProdotto = sc.nextDouble();
+            this.sc.nextLine();
             ProdottoBar nuovoProdottoBar = new ProdottoBar(descrizioneProdotto, nomeProdotto);
             if (!this.listinoGestito.controlloProdottoEsistente(nuovoProdottoBar)) {
                 this.listinoGestito.aggiungiAllaListaProdotti(nuovoProdottoBar, prezzoProdotto);
             } else {
                 System.out.println("Il prodotto non può essere aggiunto poichè già presente nel listino");
             }
+            mostraListinoBar();
             System.out.println("Vuoi aggiungere altri prodotti? [y/n] ");
-            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
-            sc.nextLine();
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         } while (flag);
         if (this.confermaOperazione()) {
-            HashMap<ProdottoBar, Double> listinoBarAggiornato = this.listinoGestito.ottieniListinoBar();
+            HashMap<ProdottoBar, Double> listinoBarAggiornato = this.listinoGestito.getPrezziBar();
             this.associatedDBMS.aggiungiProdottiBar(listinoBarAggiornato);
-            mostraListinoBar();
         }
     }
+
+    /**
+     * Questo metodo serve per modificare un ProdottoBar presente nel listino
+     */
+    public void modificaProdottoBar(){
+        this.listinoGestito.setPrezziBar(this.associatedDBMS.ottieniMappaProdottiBar());
+        HashMap<ProdottoBar, Double> prezziBar = this.listinoGestito.getPrezziBar();
+        if(prezziBar.isEmpty()) System.out.println("Non ci sono prodotti bar nel listino da modificare");
+        this.mostraListinoBar();
+
+        boolean flag;
+        do {
+            ProdottoBar prodottoScelto = this.sceltaProdottoBar(prezziBar);
+            this.sceltaOperazioneProdottoBar(prodottoScelto);
+            mostraListinoBar();
+            System.out.println("Vuoi aggiungere altri prodotti? [y/n] ");
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
+        } while (flag);
+
+        if (this.confermaOperazione()) {
+            HashMap<ProdottoBar, Double> listinoBarAggiornato = this.listinoGestito.getPrezziBar();
+            if(this.associatedDBMS.aggiornaMappaProdottoBar(listinoBarAggiornato)) System.out.println("Operazione eseguita con successo");
+            else System.out.println("Operazioni fallita");
+        }
+    }
+
+    private void sceltaOperazioneProdottoBar(ProdottoBar prodottoScelto) {
+        System.out.println("Scegli il tipo di modifica da effettuare: ");
+        System.out.println("1 : Modifica nome prodotto \n2 : Modifica descrizione prodotto \n3 : Modifica prezzo prodotto \n4 : Elimina prodotto ");
+        boolean flag = true;
+        while (flag) {
+            int scelta = this.provaScannerInt();
+            if (scelta == 1) this.modificaNomeProdotto(prodottoScelto);
+            else if (scelta == 2) this.modificaDescrizioneProdotto(prodottoScelto);
+            else if (scelta == 3) this.modificaPrezzoProdotto(prodottoScelto);
+            else if (scelta == 4) this.eliminaProdotto(prodottoScelto);
+            else {
+                System.out.println(" Non hai selezionato una scelta esistente, ritenta ");
+                continue;
+            }
+            flag = false;
+        }
+    }
+
+    private void modificaNomeProdotto(ProdottoBar prodottoScelto) {
+        System.out.println("Inserisci il nuovo nome: ");
+        String nuovoNome = this.sc.nextLine();
+        if(!this.listinoGestito.aggiornaNomeProdotto(prodottoScelto,nuovoNome)){
+            System.out.println("Nome prodotto presente, le operazioni verranno annullate");
+        }
+    }
+
+    private void modificaDescrizioneProdotto(ProdottoBar prodottoScelto) {
+        System.out.println("Inserisci la nuova descrizione: ");
+        String descrizione = this.sc.nextLine();
+        this.listinoGestito.aggiornaDescrizioneProdotto(prodottoScelto,descrizione);
+    }
+
+    private void modificaPrezzoProdotto(ProdottoBar prodottoScelto) {
+        System.out.println("Prezzo attuale prodotto : "+this.listinoGestito.getPrezziBar().get(prodottoScelto));
+        System.out.println("Inserisci nuovo prezzo: ");
+        double nuovoPrezzo = this.provaScannerDouble();
+        this.listinoGestito.aggiornaPrezzoProdotto(prodottoScelto, nuovoPrezzo);
+    }
+
+    private void eliminaProdotto(ProdottoBar prodottoScelto) {
+        if(this.confermaOperazione()){
+            if(this.listinoGestito.eliminaProdotto(prodottoScelto) != null) System.out.println("Prodotto eliminato");
+            else System.out.println("Operazione fallita");
+        }
+        else System.out.println("Operazione annullato");
+    }
+
+    private ProdottoBar sceltaProdottoBar(HashMap<ProdottoBar, Double> prezziBar) {
+        System.out.println("Inserire l'id del prodotto che vuoi modificare (int)");
+        int idProdotto = this.provaScannerInt();
+
+        for( ProdottoBar prodottoBar: prezziBar.keySet()){
+            if(prodottoBar.getIdProdotto() == idProdotto) return prodottoBar;
+        }
+
+        System.out.println("Non hai selezionato nessun prodotto esistente");
+        this.mostraListinoBar();
+        return this.sceltaProdottoBar(prezziBar);
+    }
+
 
     public void aggiungiFasciaDiPrezzo() {
         //ArrayList<ArrayList<Ombrellone>> vistaSpiaggia = associatedDBMS.ottieniVistaSpiaggia(); //TODO call a db e comunicazione handler
@@ -72,7 +167,7 @@ public class HandlerListino {
                 continue;
             }
             System.out.println("Aggiungere altre fascie di prezzo? (y/n)");
-            working = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }
         if (this.confermaOperazione()) {
             System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database//
@@ -91,9 +186,8 @@ public class HandlerListino {
 
         do {
             System.out.println("Inserire il prezzo della fascia di prezzo: ");
-            fasciaPrezzo = this.sc.nextDouble();
-            this.sc.nextLine();
-        } while (!this.isPrezzoNegativo(fasciaPrezzo));
+            fasciaPrezzo = this.provaScannerDouble();
+        } while (this.isPrezzoNegativo(fasciaPrezzo));
 
         this.listinoGestito.addPrezziFascia(nuovaFascia, fasciaPrezzo);
         this.listinoGestito.mostraFasceEPrezzi();
@@ -102,12 +196,18 @@ public class HandlerListino {
 
     private boolean confermaOperazione() {
         System.out.println("Confermi l'operazione? [y/n] ");
-        return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+        return Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
     }
 
     public void mostraListinoBar() {
-        for (ProdottoBar currentProdottoBar : this.listinoGestito.ottieniListinoBar().keySet()) {
-            System.out.println(currentProdottoBar.getNomeProdotto() + ": " + this.listinoGestito.ottieniListinoBar().get(currentProdottoBar) + "€");
+        if(this.listinoGestito.getPrezziBar().isEmpty()){
+            System.out.println("Il listino bar è vuoto");
+        }
+        else {
+            System.out.println("Listino Bar: ");
+            for (ProdottoBar currentProdottoBar : this.listinoGestito.getPrezziBar().keySet()) {
+                System.out.println(currentProdottoBar.toString() + ": " + this.listinoGestito.getPrezziBar().get(currentProdottoBar) + "€");
+            }
         }
     }
 
@@ -115,24 +215,34 @@ public class HandlerListino {
      * Questo metodo serve a modificare una fascia di prezzo esistente
      */
     public void modificaFasciaDiPrezzo() {
-        this.associatedDBMS.ottieniVistaSpiaggia();
-        // this.spiaggia.aggiornaSpiaggia(); //TODO  modificare quando viene data la posiibilità agli handler di comunicare tra di loro
-        this.associatedDBMS.ottieniListinoAggiornato();
-        // this.listinoGestito.aggiornaListino(); //TODO  modificare quando viene data la posiibilità agli handler di comunicare tra di loro
+        ArrayList<ArrayList<Ombrellone>> listaOmbrelloni = this.handlerSpiaggiaAssociato.ottieniVistaSpiaggia();
+        this.listinoGestito.aggiornaMappaFasce(this.associatedDBMS.ottieniMappaFasce());
+        HashMap<FasciaDiPrezzo, Double> prezziFascia = this.listinoGestito.getPrezziFascia();
+
+        this.outputVistaSpiaggiaFasce(listaOmbrelloni);
         listinoGestito.mostraFasceEPrezzi();
+
         boolean flag;
         do {
-            FasciaDiPrezzo fasciaDaModificare = this.selezioneFascia();
+            FasciaDiPrezzo fasciaDaModificare = this.selezioneFascia(prezziFascia);
             if (fasciaDaModificare == null) return;
 
-            this.sceltaTipoModifiche(fasciaDaModificare);
+            this.sceltaTipoModifiche(fasciaDaModificare,listaOmbrelloni);
+            prezziFascia = this.listinoGestito.getPrezziFascia();
+
+            this.outputVistaSpiaggiaFasce(listaOmbrelloni);
             listinoGestito.mostraFasceEPrezzi();
+
             System.out.println("Vuoi modificare altro? [y/n] ");
-            flag = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         } while (flag);
 
-        if (this.confermaOperazione())
-            System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
+        if(this.confermaOperazione()){
+            if(this.associatedDBMS.aggiornaMappaFascie(this.listinoGestito.getPrezziFascia())){
+                System.out.println("Operazione eseguita con successo");
+            }
+            else System.out.println("Operazioni fallita");
+        }
         else System.out.println("Operazioni annullate");
     }
 
@@ -144,7 +254,7 @@ public class HandlerListino {
         while (working) {
             sceltaOperazione();
             System.out.println("Vuoi modificare altro? (y/n)");
-            working = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
 
         }
 
@@ -222,8 +332,8 @@ public class HandlerListino {
         this.listinoGestito.setNuovoPrezzoTipologia(nomeTipologia, nuovoPrezzoTipologia);
     }
 
-    private FasciaDiPrezzo selezioneFascia() {
-        if (this.listinoGestito.getPrezziFascia().isEmpty()) {
+    private FasciaDiPrezzo selezioneFascia(HashMap<FasciaDiPrezzo, Double> prezziFascia) {
+        if (prezziFascia.isEmpty()) {
             System.out.println("Non ci sono fasce al momento");
             return null;
         }
@@ -231,9 +341,9 @@ public class HandlerListino {
         boolean flag = true;
         while (flag) {
             System.out.println("Scegli una fascia di prezzo da modificare: [nome]");
-            String app = sc.next();
+            String nomeFascia = sc.nextLine();
             for (FasciaDiPrezzo fasciaAttuale : this.listinoGestito.getPrezziFascia().keySet()) {
-                if (fasciaAttuale.getNome().equals(app)) {
+                if (fasciaAttuale.getNome().equals(nomeFascia)) {
                     fasciaDaModificare = fasciaAttuale;
                 }
             }
@@ -241,23 +351,21 @@ public class HandlerListino {
                 System.out.println("Non hai selezionato una fascia esistente, ritenta");
                 continue;
             }
-
             flag = false;
         }
         return fasciaDaModificare;
     }
 
-    private void sceltaTipoModifiche(FasciaDiPrezzo fasciaDaModificare) {
+    private void sceltaTipoModifiche(FasciaDiPrezzo fasciaDaModificare, ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
         System.out.println("Scegli il tipo di modifica da effettuare: ");
         System.out.println("1 : Modifica prezzo fascia \n2 : Modifica locazione fascia \n3 : Elimina fascia  ");
         boolean flag = true;
         while (flag) {
-            int scelta = sc.nextInt();
-            sc.nextLine();
+            int scelta = this.provaScannerInt();
             if (scelta == 1) {
                 this.modificaPrezzo(fasciaDaModificare);
             } else if (scelta == 2) {
-                this.modificaLocazione(fasciaDaModificare);
+                this.modificaLocazione(fasciaDaModificare,listaOmbrelloni);
             } else if (scelta == 3) {
                 this.eliminaFascia(fasciaDaModificare);
             } else {
@@ -270,30 +378,87 @@ public class HandlerListino {
 
     private void modificaPrezzo(FasciaDiPrezzo fasciaDaModificare) {
         System.out.println("Inserisci il nuovo prezzo della fascia: ");
-        double nuovoPrezzo = sc.nextDouble();
-        sc.nextLine();
+        double nuovoPrezzo = this.provaScannerDouble();
         this.listinoGestito.modificaPrezzoFascia(fasciaDaModificare, nuovoPrezzo);
     }
 
-    private void modificaLocazione(FasciaDiPrezzo fasciaDaModificare) {
-        //TODO inserire output con fasce (sfruttare la griglia spiaggia quando verrà implementata)
+    private void modificaLocazione(FasciaDiPrezzo fasciaDaModificare, ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        this.outputVistaSpiaggiaFasce(listaOmbrelloni);
 
         FasciaDiPrezzo fasciaTemporanea = new FasciaDiPrezzo("Temporanea");
         System.out.println("Inserisci la nuova prima locazione");
         fasciaTemporanea.setCoordinateInizio(this.selezionaPosto());
+        if(!this.controlloEsistenzaCoordinate(fasciaTemporanea.getCoordinateInizio(),listaOmbrelloni)) return;
         System.out.println("Inserisci la nuova ultima locazione");
         fasciaTemporanea.setCoordinateFine(this.selezionaPosto());
+        if(!this.controlloEsistenzaCoordinate(fasciaTemporanea.getCoordinateFine(),listaOmbrelloni)) return;
 
-        //TODO inserire controllo attraverso la griglia per controllare se le coordinate sono presenti
         if (!this.controlloCoordinate(fasciaTemporanea)) {
             System.out.println("Le coordinate dell'inizio dela fascia si trovano dopo la sua fine, l'operazione non verrà eseguita");
             return;
         }
 
-        if (controlloLocazioni(fasciaDaModificare, fasciaTemporanea))
-            this.listinoGestito.modificaLocazioniFascia(fasciaDaModificare, fasciaTemporanea);
-        else
-            System.out.println("La fascia con le nuove locazioni si sovrappone ad un'altra, l'operazione non verrà eseguita");
+        if (controlloLocazioni(fasciaDaModificare, fasciaTemporanea)) this.listinoGestito.modificaLocazioniFascia(fasciaDaModificare, fasciaTemporanea);
+        else System.out.println("La fascia con le nuove locazioni si sovrappone ad un'altra, l'operazione non verrà eseguita");
+    }
+
+    private boolean controlloEsistenzaCoordinate(Coordinate coordinate, ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        try{
+            listaOmbrelloni.get(coordinate.getyAxis()).get(coordinate.getyAxis());
+        }catch (Exception e) {
+            System.out.println("Le coordinate inserite non fanno parte della spiaggia, le operazioni verranno annullate ");
+            return false;
+        }
+        return true;
+    }
+
+    private void outputVistaSpiaggiaFasce(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        ArrayList<ArrayList<String>> griglia = this.convertiAGrigliaVuota(listaOmbrelloni);
+
+        for(FasciaDiPrezzo fascia : this.listinoGestito.getPrezziFascia().keySet()){
+            this.inserisciFasciaInGriglia(fascia,griglia);
+        }
+
+        StringBuilder str = new StringBuilder();
+        for (ArrayList<String> riga : griglia) {
+            for (String posto : riga) {
+                str.append(posto).append("\t");
+            }
+            str.append("\n");
+        }
+        System.out.println(str);
+    }
+
+    private void inserisciFasciaInGriglia(FasciaDiPrezzo fascia, ArrayList<ArrayList<String>> griglia) {
+        int x = 0;
+        int y = 0;
+        for (ArrayList<String> riga : griglia) {
+            for (String posto : riga) {
+                int yInizioFascia = fascia.getCoordinateInizio().getyAxis();
+                int xInizioFascia = fascia.getCoordinateInizio().getxAxis();
+                int yFineFascia = fascia.getCoordinateFine().getyAxis();
+                int xFineFascia = fascia.getCoordinateFine().getxAxis();
+                if((x>=xInizioFascia && y==yInizioFascia)||(y>yInizioFascia && y<yFineFascia)||(y==yFineFascia && x<=xFineFascia)){
+                    griglia.get(y).set(x, fascia.getNome());
+                }
+                x++;
+            }
+            x=0;
+            y++;
+        }
+    }
+
+    private ArrayList<ArrayList<String>> convertiAGrigliaVuota(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        ArrayList<ArrayList<String>> griglia = new ArrayList<>();
+
+        for(ArrayList<Ombrellone> riga : listaOmbrelloni){
+            ArrayList<String> rigaGriglia = new ArrayList<>();
+            for(Ombrellone posto : riga){
+                rigaGriglia.add(null);
+            }
+            griglia.add(rigaGriglia);
+        }
+        return griglia;
     }
 
     private void eliminaFascia(FasciaDiPrezzo fasciaDaModificare) {
@@ -331,5 +496,40 @@ public class HandlerListino {
         int yUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getyAxis();
         int xUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getxAxis();
         return yPrimoTemporanea < yUltimoTemporanea || (yPrimoTemporanea == yUltimoTemporanea && xPrimoTemporanea < xUltimoTemporanea);
+    }
+
+
+    private int provaScannerInt(){
+        while(true){
+            try{
+                int intero = this.sc.nextInt();
+                this.sc.nextLine();
+                return intero;
+            } catch (Exception e) {
+                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
+            }
+        }
+    }
+    
+    private double provaScannerDouble(){
+        while(true){
+            try{
+                double numero = this.sc.nextDouble();
+                this.sc.nextLine();
+                return numero;
+            } catch (Exception e) {
+                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
+            }
+        }
+    }
+
+
+    public HashMap<TipologiaOmbrellone, Double> ottieniTipologie() {
+        this.listinoGestito.aggiornaTipologie(this.associatedDBMS.ottieniTipologie());
+        return this.listinoGestito.getPrezziTipologia();
+    }
+
+    public void aggiungiNuovaTipologia(TipologiaOmbrellone tipologiaOmbrellone) {
+        this.listinoGestito.aggiungiTipologia(tipologiaOmbrellone);
     }
 }

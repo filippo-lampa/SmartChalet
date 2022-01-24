@@ -1,9 +1,11 @@
 package it.unicam.cs.ids2021;
-import java.sql.*;
+
 import java.util.ArrayList;
+import java.sql.*;
 import java.util.HashMap;
 
 public class DBMSController {
+
     private Statement stmt = null;
 
     /**
@@ -76,7 +78,7 @@ public class DBMSController {
         return null;
     }
 
-    public void aggiugniGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+    public void aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
         System.out.println("Nuova griglia spiaggia aggiunta al database");
     }
 
@@ -88,9 +90,63 @@ public class DBMSController {
         System.out.println("Nuovi prodotti bar aggiunti al database");
     }
 
-    public void ottieniListaAttivita() {
+
+    public HashMap<Attrezzatura, Integer> ottieniAttrezzatureAggiornate() {
+        return null;
     }
 
-    public void ottieniListaAttrezzature() {
+    public HashMap<Attrezzatura, Integer> ottieniMappaAttrezzature(){
+        Attrezzatura sdraio = new Attrezzatura("Sdraio", "Roba su cui ci si sdraia");
+        Attrezzatura posacenere = new Attrezzatura("Posacenere", "Roba in cui si cicca");
+
+        HashMap<Attrezzatura, Integer> listaAttrezzaturaTest = new HashMap<>();
+        listaAttrezzaturaTest.put(sdraio, 10);
+        listaAttrezzaturaTest.put(posacenere, 5);
+
+        return listaAttrezzaturaTest;
+
+    }
+
+    public void aggiornaMappaAttrezzature(HashMap<Attrezzatura, Integer> mappaAttrezzatura) {
+    }
+
+    public ArrayList<Attivita> ottieniListaAttivita() {
+        return null;
+    }
+
+    public HashMap<ProdottoBar, Double> ottieniMappaProdottiBar() {
+        return null;
+    }
+
+    public boolean aggiornaMappaProdottoBar(HashMap<ProdottoBar, Double> listinoBarAggiornato) {
+        return true;
+    }
+
+    public ArrayList<Prenotazione> ottieniListaPrenotazioni() {
+        return null;
+    }
+
+    public boolean aggiornaListaAttivita(ArrayList<Attivita> ottieniListaAttivitaDisponibili) {
+        return true;
+    }
+
+    public HashMap<TipologiaOmbrellone, Double> ottieniTipologie() {
+        return null;
+    }
+
+    public boolean aggiornaMappaSpiaggia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        return true;
+    }
+
+    public boolean aggiornaMappaTipologie(HashMap<TipologiaOmbrellone, Double> prezziTipologia) {
+        return true;
+    }
+
+    public HashMap<FasciaDiPrezzo, Double> ottieniMappaFasce() {
+        return null;
+    }
+
+    public boolean aggiornaMappaFascie(HashMap<FasciaDiPrezzo, Double> prezziFascia) {
+        return true;
     }
 }

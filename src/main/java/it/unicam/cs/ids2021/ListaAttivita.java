@@ -5,66 +5,23 @@ import java.util.Date;
 
 public class ListaAttivita {
 
-    private final ArrayList<Attivita> listaAttivita ;
+    private ArrayList<Attivita> lista;
 
-    public ListaAttivita() {
-        this.listaAttivita = new ArrayList<>();
+    public ListaAttivita(){
+        this.lista = new ArrayList<>();
     }
 
-    public void aggiornaListaAttivita(){
-
+    public void aggiornaListaAttivita(ArrayList<Attivita> listaAggiornata){
+        this.lista = listaAggiornata;
     }
 
-    public boolean isNuovaAttivita(Attivita attivita){  //controlloInserimento
-        for(Attivita attivitaEsistenti : this.listaAttivita){
-            if(attivitaEsistenti.equals(attivita)) return false;
-        }
-        return true;
-    }
-
-    public ArrayList<Attivita> getListaAttivita(){
-        return this.listaAttivita;
-    }
-
-    public boolean controlloDisponibilitaNome(){
-        return true;
-    }
-
-    public void aggiornaNomeAttivita(String nuovoNome, int idAttivita){
-
-    }
-
-    public void aggiornaDescrizioneAttivita(String nuovaDescrizione, int idAttivita){
-
-    }
-
-    public void aggiornaDataEOraAttivita(Date nuovaData, int idAttivita){
-
-    }
-
-    public int ottieniNumeroIscrittiAttivita(int idAttivita){
-        return 0;
-    }
-
-    public void aggiornaNumeroMassimoPostiAttivita(int numeroMassimo, int idAttivita){
-
-    }
-
-    public void aggiornaNumeroAttrezzaturaAttivita(int idAttivita,int numeroAttrezzatura, int idAttrezzatura){
-
-    }
-
-    public boolean rimuoviAttivita(int idAttivita){
-        return true;
-    }
-
-    public void aggiungiAttivita(Attivita attivita){
-        this.listaAttivita.add(attivita);
+    public ArrayList<Attivita> ottieniListaAttivitaAggiornata() {
+        return  this.lista;
     }
 
     public int getNewIdAttivita(){
         int highestId = -1;
-        for(Attivita attivita : this.listaAttivita){
+        for(Attivita attivita : this.lista){
             if(attivita.getId() > highestId){
                 highestId = attivita.getId();
             }
@@ -72,4 +29,48 @@ public class ListaAttivita {
         return highestId + 1;
     }
 
+    public boolean isNuovaAttivita(Attivita attivita){  //controlloInserimento
+        for(Attivita attivitaEsistenti : this.lista){
+            if(attivitaEsistenti.equals(attivita)) return false;
+        }
+        return true;
+    }
+
+    public void aggiungiAttivita(Attivita attivita){
+        this.lista.add(attivita);
+    }
+
+    public boolean controlloDisponibilitaNome(String nome, Date data, int fasciaOraria) {
+        for(Attivita attivita : this.lista)
+            if(attivita.getNome().equals(nome) && attivita.getData().equals(data) && attivita.getFasciaOraria() == fasciaOraria)
+                return false;
+        return true;
+    }
+
+    public void aggiornaNomeAttivita(Attivita attivitaDaModificare, String nome) {
+        this.lista.get(this.lista.indexOf(attivitaDaModificare)).setNome(nome);
+    }
+
+    public void aggiornaDescrizioneAttivita(Attivita attivitaDaModificare, String descrizione) {
+        this.lista.get(this.lista.indexOf(attivitaDaModificare)).setDescrizione(descrizione);
+
+    }
+
+    public void aggiornaDataEOraAttivita(Attivita attivitaDaModificare, Date nuovaData, int fasciaOraria) {
+        this.lista.get(this.lista.indexOf(attivitaDaModificare)).setData(nuovaData);
+        this.lista.get(this.lista.indexOf(attivitaDaModificare)).setFasciaOraria(fasciaOraria);
+    }
+
+    public void aggiornaNumeroMassimoPostiAttivita(Attivita attivitaDaModificare, int nuovoMaxPosti) {
+        this.lista.get(this.lista.indexOf(attivitaDaModificare)).setMaxPartecipanti(nuovoMaxPosti);
+
+    }
+
+    public int ottieniNumeroIscrittiAttivita(Attivita attivitaDaModificare) {
+        return attivitaDaModificare.getNumeroIscritti();
+    }
+
+    public void rimuoviAttivita(Attivita attivitaDaModificare) {
+        this.lista.remove(attivitaDaModificare);
+    }
 }

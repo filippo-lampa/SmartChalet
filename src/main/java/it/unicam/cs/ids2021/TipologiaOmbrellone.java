@@ -4,10 +4,15 @@ public class TipologiaOmbrellone {
 
     private String nome;
     private String descrizione;
+    private int id;
 
     public TipologiaOmbrellone (String nome, String descrizione){
         this.nome = nome;
         this.descrizione = descrizione;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getNome() {
@@ -30,4 +35,5 @@ public class TipologiaOmbrellone {
     public String toString() {
         return "[" + nome + ": '" + descrizione + '\'' + ']';
     }
+
 }

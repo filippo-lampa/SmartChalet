@@ -16,8 +16,16 @@ public class Listino {
         prezzoBaseOmbrellone = 10.00;
     }
 
-    public double calcolaPrezzoPrenotazione(int idTipologia, int idFascia) {
-        return prezzoBaseOmbrellone * prezziTipologia.get(idTipologia) * prezziFascia.get(idFascia) ;
+    public double calcolaPrezzoPrenotazione(int idTipologia, String nomeFascia) {
+        FasciaDiPrezzo fascia = null;
+        for(FasciaDiPrezzo fasciaCorrente : this.prezziFascia.keySet())
+            if(fasciaCorrente.getNome().equals(nomeFascia))
+                fascia = fasciaCorrente;
+        for(TipologiaOmbrellone tipologia : this.prezziTipologia.keySet())
+            if(tipologia.getId() == idTipologia)
+                return prezzoBaseOmbrellone * prezziTipologia.get(tipologia) * prezziFascia.get(fascia) ;
+        System.out.println("La tipologia su cui calcolare il prezzo della prenotazione non esiste");
+        return -1;
     }
 
     public void aggiornaListino(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
@@ -30,10 +38,6 @@ public class Listino {
 
     public void aggiungiAllaListaProdotti(ProdottoBar nuovoProdottoBar, Double prezzoProdotto) {
         this.prezziBar.put(nuovoProdottoBar, prezzoProdotto);
-    }
-
-    public HashMap<ProdottoBar, Double> ottieniListinoBar() {
-        return this.prezziBar;
     }
 
     public HashMap<TipologiaOmbrellone, Double> getPrezziTipologia() {
@@ -120,6 +124,40 @@ public class Listino {
         return true;
     }
 
+    public Double eliminaProdotto(ProdottoBar prodottoScelto) {
+        return this.getPrezziBar().remove(prodottoScelto);
+    }
+
+    public void aggiornaPrezzoProdotto(ProdottoBar prodottoScelto, double nuovoPrezzo) {
+        this.getPrezziBar().put(prodottoScelto,nuovoPrezzo);
+    }
+
+    public void aggiornaDescrizioneProdotto(ProdottoBar prodottoScelto, String descrizione) {
+        for(ProdottoBar prodotto: this.getPrezziBar().keySet()){
+            if(prodotto.equals(prodottoScelto)) prodotto.setDescrizione(descrizione);
+        }
+    }
+
+    public boolean aggiornaNomeProdotto(ProdottoBar prodottoScelto, String nuovoNome) {
+        for(ProdottoBar prodotto: this.getPrezziBar().keySet()){
+            if(prodotto.getNomeProdotto().equals(nuovoNome)) return false;
+        }
+        prodottoScelto.setNomeProdotto(nuovoNome);
+        return true;
+    }
+
+    public void aggiornaTipologie(HashMap<TipologiaOmbrellone, Double> tipologie) {
+        this.prezziTipologia = tipologie;
+    }
+
+    public void aggiungiTipologia(TipologiaOmbrellone tipologiaOmbrellone) {
+        this.prezziTipologia.put(tipologiaOmbrellone,null);
+    }
+
+    public void aggiornaMappaFasce(HashMap<FasciaDiPrezzo, Double> fascieDiPrezzo) {
+        this.prezziFascia = fascieDiPrezzo;
+    }
+
  /*   public int getNewIdTipologia(){
         int highestId = -1;
         if(!this.prezziTipologia.isEmpty()) {
@@ -130,4 +168,5 @@ public class Listino {
         }
         return highestId + 1;
     }*/
+
 }

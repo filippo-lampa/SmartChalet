@@ -155,4 +155,7 @@ public class Spiaggia {
         return str.toString();
     }
 
+    public void aggiornaSpiaggia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        this.listaOmbrelloni = listaOmbrelloni;
+    }
 }

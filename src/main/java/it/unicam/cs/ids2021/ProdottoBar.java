@@ -52,4 +52,8 @@ public class ProdottoBar {
         return Objects.hash(nomeProdotto, idProdotto);
     }
 
+    @Override
+    public String toString() {
+        return "Id: "+this.idProdotto+", [" + this.nomeProdotto + " : " + descrizione + '}';
+    }
 }

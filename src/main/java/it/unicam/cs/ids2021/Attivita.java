@@ -5,101 +5,155 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class Attivita {
+    private int id;
+    private Date data;
+    private int fasciaOraria;   //TODO controllare modifica
 
-    private final int id;
+    public void setNumeroIscritti(int numeroIscritti) {
+        this.numeroIscritti = numeroIscritti;
+    }
+
+    private int numeroIscritti; //TODO controllare aggiunta parametro ed aggiornare diagramma
     private String nome;
     private String descrizione;
-    private Date date;
-    private int maxPartecipant;
+    private int maxPartecipanti;
     private String animatore;
     private HashMap<Attrezzatura,Integer> attrezzatureAssociate;
     private int oreDurata;
 
-    public Attivita(int id, String nome, String descrizione, Date date, int maxPartecipant, String animatore, int oreDurata) {
-        this.id = id;
+    public Attivita(int id, String nome, String descrizione, Date data, int maxPartecipanti, String animatore, int oreDurata, int fasciaOraria){
+        this.attrezzatureAssociate = new HashMap<>();
         this.nome = nome;
         this.descrizione = descrizione;
-        this.date = date;
-        this.maxPartecipant = maxPartecipant;
-        this.animatore = animatore;
-        this.attrezzatureAssociate = new HashMap<>();
+        this.data = data;
         this.oreDurata = oreDurata;
+        this.maxPartecipanti = maxPartecipanti;
+        this.animatore = animatore;
+        this.fasciaOraria = fasciaOraria;
+        this.numeroIscritti = 0;
     }
 
-    public int getId() {
-        return id;
+
+    public int getFasciaOraria() {
+        return fasciaOraria;
     }
 
-    public String getNome() {
-        return nome;
+    public void setFasciaOraria(int fasciaOraria) {
+        this.fasciaOraria = fasciaOraria;
+    }
+
+    public void setData(Date data) {
+        this.data = data;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
-    public String getDescrizione() {
-        return descrizione;
-    }
-
     public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public int getMaxPartecipant() {
-        return maxPartecipant;
-    }
-
-    public void setMaxPartecipant(int maxPartecipant) {
-        this.maxPartecipant = maxPartecipant;
-    }
-
-    public String getAnimatore() {
-        return animatore;
+    public void setMaxPartecipanti(int maxPartecipanti) {
+        this.maxPartecipanti = maxPartecipanti;
     }
 
     public void setAnimatore(String animatore) {
         this.animatore = animatore;
     }
 
-    public HashMap<Attrezzatura, Integer> getAttrezzatureAssociate() {
-        return attrezzatureAssociate;
-    }
-
     public void setAttrezzatureAssociate(HashMap<Attrezzatura, Integer> attrezzatureAssociate) {
         this.attrezzatureAssociate = attrezzatureAssociate;
-    }
-
-    public int getOreDurata() {
-        return oreDurata;
     }
 
     public void setOreDurata(int oreDurata) {
         this.oreDurata = oreDurata;
     }
 
-    public void aggiungiAttrezzaturaAdAttivita(Attrezzatura attrezzatura, int numeroAttrezzatura){
+    public void printDettagliAttivita(){
 
+        System.out.println("Attività{" +
+                "data=" + data +
+                ", nome='" + nome + '\'' +
+                ", descrizione='" + descrizione + '\'' +
+                ", maxPartecipanti=" + maxPartecipanti +
+                ", animatore='" + animatore + '\'' +
+                ", oreDurata=" + oreDurata
+        );
+
+        System.out.println("attrezzatura associata: ");
+        printAttrezzatureAssociate();
+        System.out.println(" }");
+    }
+
+    public void printAttrezzatureAssociate(){
+        System.out.println("Attrezzature associate:");
+        for(Attrezzatura attrezzatura : this.attrezzatureAssociate.keySet()){
+            System.out.println("Nome: " + attrezzatura.getNome() + "\t|\t" + this.attrezzatureAssociate.get(attrezzatura) + "pz");
+        }
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Date getData() {
+        return data;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public int getMaxPartecipanti() {
+        return maxPartecipanti;
+    }
+
+    public String getAnimatore() {
+        return animatore;
+    }
+
+    public HashMap<Attrezzatura, Integer> getAttrezzatureAssociate() {
+        return attrezzatureAssociate;
+    }
+
+    public int getOreDurata() {
+        return oreDurata;
+    }
+
+    public int getNumeroIscritti() {
+        return this.numeroIscritti;
+    }
+
+    public void aggiornaPostiDisponibiliAttivita(int numeropartecipanti) {
+        this.setNumeroIscritti(this.getNumeroIscritti()+numeropartecipanti);
+    }
+
+
+    public boolean isAttrezzaturaAssociata(String nomeAttrezzatura) {
+        for(Attrezzatura attrezzatura : this.attrezzatureAssociate.keySet())
+            if(attrezzatura.getNome().equals(nomeAttrezzatura))
+                return true;
+        return false;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Attivita attivita = (Attivita) o;
-        return id == attivita.id && maxPartecipant == attivita.maxPartecipant && oreDurata == attivita.oreDurata && nome.equals(attivita.nome) && descrizione.equals(attivita.descrizione) && date.equals(attivita.date) && animatore.equals(attivita.animatore) && Objects.equals(attrezzatureAssociate, attivita.attrezzatureAssociate);
+    public String toString() {
+        return  "Id: " + id +
+                ", [data: " + data +
+                ", fasciaOraria:" + fasciaOraria +
+                ", numeroIscritti: " + numeroIscritti +
+                ", nome: " + nome +
+                ", descrizione: " + descrizione +
+                ", maxPartecipanti: " + maxPartecipanti +
+                ", animatore: " + animatore +
+                ", attrezzatureAssociate: " + attrezzatureAssociate.toString() +
+                ", oreDurata: " + oreDurata + ']';
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, nome, descrizione, date, maxPartecipant, animatore, attrezzatureAssociate, oreDurata);
-    }
+
 }
