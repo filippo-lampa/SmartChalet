@@ -1,6 +1,5 @@
 package it.unicam.ids.smartchalet.asf;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +16,16 @@ public class Listino {
         prezzoBaseOmbrellone = 10.00;
     }
 
-    public double calcolaPrezzoPrenotazione(int idTipologia, int idFascia) {
-        return prezzoBaseOmbrellone * prezziTipologia.get(idTipologia) * prezziFascia.get(idFascia) ;
+    public double calcolaPrezzoPrenotazione(int idTipologia, String nomeFascia) {
+        FasciaDiPrezzo fascia = null;
+        for(FasciaDiPrezzo fasciaCorrente : this.prezziFascia.keySet())
+            if(fasciaCorrente.getNome().equals(nomeFascia))
+                fascia = fasciaCorrente;
+        for(TipologiaOmbrellone tipologia : this.prezziTipologia.keySet())
+            if(tipologia.getId() == idTipologia)
+                return prezzoBaseOmbrellone * prezziTipologia.get(tipologia) * prezziFascia.get(fascia) ;
+        System.out.println("La tipologia su cui calcolare il prezzo della prenotazione non esiste");
+        return -1;
     }
 
     public void aggiornaListino(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
@@ -31,10 +38,6 @@ public class Listino {
 
     public void aggiungiAllaListaProdotti(ProdottoBar nuovoProdottoBar, Double prezzoProdotto) {
         this.prezziBar.put(nuovoProdottoBar, prezzoProdotto);
-    }
-
-    public HashMap<ProdottoBar, Double> ottieniListinoBar() {
-        return this.prezziBar;
     }
 
     public HashMap<TipologiaOmbrellone, Double> getPrezziTipologia() {

@@ -1,16 +1,25 @@
 package it.unicam.ids.smartchalet.asf;
 
 public class Attrezzatura {
-    private String nomeAttrezzatura;
+
+    private int id;
+    private String nome;
     private String descrizione;
 
-    public Attrezzatura(String nomeAttrezzatura, String descrizione) {
-        this.nomeAttrezzatura = nomeAttrezzatura;
+    public Attrezzatura(String nome, String descrizione){
+        this.nome = nome;
         this.descrizione = descrizione;
     }
 
-    public String getNomeAttrezzatura() {
-        return nomeAttrezzatura;
+    public int getId() {
+        return id;
     }
 
+    public String getNome() {
+        return nome;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
 }

@@ -4,60 +4,100 @@ import java.util.*;
 
 public class HandlerAttrezzatura {
 
-    private ListaAttrezzature listaAttrezzaturaAssociata;
-    private final DBMSController associatedDBMS;
-    private Scanner sc;
+    private ListaAttrezzatura listaAttrezzaturaAssociata;
+    private DBMSController associatedDBMS;
+    Scanner sc;
 
-    public HandlerAttrezzatura(ListaAttrezzature listaAttrezzaturaAssociata, DBMSController associatedDBMS) {
-        sc = new Scanner(System.in);
+    public HandlerAttrezzatura(ListaAttrezzatura listaAttrezzaturaAssociata, DBMSController associatedDBMS){
         this.listaAttrezzaturaAssociata = listaAttrezzaturaAssociata;
         this.associatedDBMS = associatedDBMS;
-
+        this.sc = new Scanner(System.in);
     }
 
+    public ArrayList<Attrezzatura> ottieniListaAttrezzaturaAggiornata() {
+        return this.listaAttrezzaturaAssociata.ottieniListaAttrezzaturaAggiornata();
+    }
+
+    public HashMap<Attrezzatura,Integer> ottieniMappaAttrezzature() {
+        this.listaAttrezzaturaAssociata.aggiornaListaAttrezzature(this.associatedDBMS.ottieniMappaAttrezzature());
+        return this.listaAttrezzaturaAssociata.getMappaAttrezzatura();
+    }
+
+    public ListaAttrezzatura getListaAttrezzatura(){
+        return this.listaAttrezzaturaAssociata;
+    }
+
+    public HashMap<Attrezzatura, Integer> getMappaAttrezzaturaAssociata() {
+        return this.listaAttrezzaturaAssociata.getMappaAttrezzatura();
+    }
+
+    public boolean controlloDisponibilitaAttrezzatura(String nomeAttrezzatura, int numeroAttrezzature) {
+        return this.listaAttrezzaturaAssociata.controlloDisponibilitaAttrezzatura(nomeAttrezzatura, numeroAttrezzature);
+    }
+
+    public boolean riservaAttrezzature(String nomeAttrezzatura, int numeroAttrezzatureDesiderato) {
+        return this.listaAttrezzaturaAssociata.riservaAttrezzatura(nomeAttrezzatura, numeroAttrezzatureDesiderato);
+    }
+
+
     public void aggiungiAttrezzatura() {
-        HashMap<Attrezzatura, Integer> tempLista = associatedDBMS.ottieniListaAttrezzature();
-        listaAttrezzaturaAssociata.aggiornaListaAttrezzatura(tempLista);
-        listaAttrezzaturaAssociata.getAttrezzature();
+        listaAttrezzaturaAssociata.aggiornaMappaAttrezzatura(associatedDBMS.ottieniMappaAttrezzature());
+        listaAttrezzaturaAssociata.printMappaAttrezzature();
 
         boolean working = true;
 
         while (working) {
-            String nomeAttrezzatura;
-            String descrizioneAttrezzatura;
 
-            nomeAttrezzatura = richiestaNomeAttrezzaturaDaAggiungere();
-
-            if (!this.listaAttrezzaturaAssociata.controlloAttrezzaturaEsistente(nomeAttrezzatura)) {
-                descrizioneAttrezzatura = richiestaDescrizioneAttrezzatura();
-
-                Attrezzatura nuovaAttrezzatura = new Attrezzatura(nomeAttrezzatura, descrizioneAttrezzatura);
-                listaAttrezzaturaAssociata.addAttrezzatura(nuovaAttrezzatura, 0);
-            }
-
-            int quantitaAttrezzatura = richiestaNumeroAttrezzatura();
-
-            listaAttrezzaturaAssociata.aggiungiQuantitaAttrezzatura(nomeAttrezzatura, quantitaAttrezzatura);
-
-            listaAttrezzaturaAssociata.getAttrezzature();
-            System.out.println("Aggiungere altre attrezzature? [y/n]");
-            working = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+            System.out.println("Digitare 1 per creare una nuova attrezzatura o 2 per aggiungere elementi ad un'attrezzatura esistente");
+            int op = sc.nextInt();
             sc.nextLine();
+            if(op == 1){
+                creaAttrezzatura();
+            }
+            if(op == 2){
+                aggiungiElementiAdAttrezzatura();
+            }
+            listaAttrezzaturaAssociata.printMappaAttrezzature();
+            System.out.println("Vuoi eseguire altre operazioni sulle attrezzature? [y/n]");
+            working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }
         if (this.confermaOperazione()) {
-            sc.nextLine();
+            // this.associatedDBMS.aggiornaMappaAttrezzature(this.listaAttrezzaturaAssociata.getMappaAttrezzatura());
             System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
-            listaAttrezzaturaAssociata.getAttrezzature();
+
         } else System.out.println("Operazioni annullate");
     }
 
-    private String richiestaNomeAttrezzaturaDaAggiungere() {
+    private void aggiungiElementiAdAttrezzatura() {
+        String nomeAttrezzatura = this.richiestaNomeAttrezzatura();
+        if (this.listaAttrezzaturaAssociata.controlloAttrezzaturaEsistente(nomeAttrezzatura)) {
+            this.listaAttrezzaturaAssociata.aggiungiQuantitaAttrezzatura(nomeAttrezzatura, richiestaNumeroAttrezzatura());
+        }
+    }
+
+    private void creaAttrezzatura(){
+        String nomeAttrezzatura;
+        String descrizioneAttrezzatura;
+
+        nomeAttrezzatura = richiestaNomeAttrezzatura();
+
+        if (!this.listaAttrezzaturaAssociata.controlloAttrezzaturaEsistente(nomeAttrezzatura)) {
+            descrizioneAttrezzatura = richiestaDescrizioneAttrezzatura();
+
+            Attrezzatura nuovaAttrezzatura = new Attrezzatura(nomeAttrezzatura, descrizioneAttrezzatura);
+            listaAttrezzaturaAssociata.addAttrezzatura(nuovaAttrezzatura, richiestaNumeroAttrezzatura());
+        }
+        else System.out.println("L'attrezzatura che si desidera inserire esiste già");
+
+    }
+
+    private String richiestaNomeAttrezzatura() {
         boolean flag = true;
         String nuovoNome;
         do {
-            System.out.println("Inserire nome della nuova attrezzatura");
+            System.out.println("Inserire nome dell'attrezzatura");
             nuovoNome = sc.nextLine();
-            if (nuovoNome!=null){
+            if (!nuovoNome.isEmpty()){
                 flag = false;
             }
         } while (flag);
@@ -100,13 +140,12 @@ public class HandlerAttrezzatura {
 
     private boolean confermaOperazione() {
         System.out.println("Confermi l'operazione? [y/n] ");
-        return Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
+        return Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
     }
 
     public void rimuoviAttrezzatura() {
-        //HashMap<Attrezzatura, Integer> tempLista = associatedDBMS.ottieniListaAttrezzature();
-        //listaAttrezzaturaAssociata.aggiornaListaAttrezzatura(tempLista);
-        listaAttrezzaturaAssociata.getAttrezzature();
+       // listaAttrezzaturaAssociata.aggiornaMappaAttrezzatura(associatedDBMS.ottieniMappaAttrezzature());  //TODO
+        listaAttrezzaturaAssociata.printMappaAttrezzature();
 
         boolean working = true;
 
@@ -114,7 +153,7 @@ public class HandlerAttrezzatura {
         while (working) {
             String nomeAttrezzatura;
 
-            nomeAttrezzatura = richiestaNomeAttrezzaturaDaRimuovere();
+            nomeAttrezzatura = richiestaNomeAttrezzatura();
 
             boolean goodAmount = false;
             while (!goodAmount) {
@@ -122,48 +161,25 @@ public class HandlerAttrezzatura {
 
                 if (listaAttrezzaturaAssociata.controlloDisponibilitaAttrezzatura(nomeAttrezzatura, quantitaAttrezzatura)) {
                     goodAmount = true;
-                } else {
-                    System.out.println("Non è possibile rimuovere " + quantitaAttrezzatura + " elementi, inserire un altro numero.");
-                    continue;
-                }
+                } else System.out.println("Non è possibile rimuovere " + quantitaAttrezzatura + " elementi, inserire un altro numero.");
 
             }
             listaAttrezzaturaAssociata.rimuoviQuantitaAttrezzatura(nomeAttrezzatura, quantitaAttrezzatura);
-            listaAttrezzaturaAssociata.getAttrezzature();
+            listaAttrezzaturaAssociata.printMappaAttrezzature();
             System.out.println("Rimuovere altre attrezzature? [y/n]");
-            working = Objects.equals(this.sc.next().trim().toLowerCase(Locale.ROOT), "y");
-            sc.nextLine();
+            working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }
         if (this.confermaOperazione()) {
-            sc.nextLine();
+            // this.associatedDBMS.aggiornaMappaAttrezzature(this.listaAttrezzaturaAssociata.getMappaAttrezzatura());
             System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
-            listaAttrezzaturaAssociata.getAttrezzature();
+
         } else System.out.println("Operazioni annullate");
     }
 
-    private String richiestaNomeAttrezzaturaDaRimuovere() {
-        boolean flag = true;
-        String nomeAttrezzatura;
-        do {
-            System.out.println("Inserire nome dell'attrezzatura di cui rimuovere unità:");
-            nomeAttrezzatura = sc.nextLine();
 
-            if (nomeAttrezzatura!=null) {
-                flag = false;
-            } else {
-                continue;
-            }
+    public void aggiornaListaAttrezzatura(){
+        this.listaAttrezzaturaAssociata.aggiornaMappaAttrezzatura(this.associatedDBMS.ottieniMappaAttrezzature());
 
-        } while (flag);
-
-        return nomeAttrezzatura;
     }
-
-
-    public void riservaAttrezzatura(Attrezzatura attrezzatura, int numeroAttrezzatura) {
-
-        return;
-    }
-
 
 }

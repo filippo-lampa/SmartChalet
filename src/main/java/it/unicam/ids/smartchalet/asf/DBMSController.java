@@ -1,8 +1,13 @@
 package it.unicam.ids.smartchalet.asf;
 
-import java.util.*;
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class DBMSController {
 
@@ -99,37 +104,64 @@ public class DBMSController {
     }
 
     public ArrayList<Prenotazione> richiestaListaPrenotazioni() {
-        ArrayList<Prenotazione> listaPrenotazioneTest = new ArrayList<Prenotazione>();
+        ArrayList<Prenotazione> listaPrenTest= new ArrayList<Prenotazione>();
         Prenotazione prenotazioneTest1 = new Prenotazione();
+        prenotazioneTest1.setId(1);
+        prenotazioneTest1.setIdCliente(1);
+
+        Date dataInizio1 = null;
+        Date dataFine1 = null;
+        try {
+            dataInizio1 = new SimpleDateFormat("dd/MM/yyyy").parse("22/02/2022");
+            dataFine1 = new SimpleDateFormat("dd/MM/yyyy").parse("24/02/2022");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        prenotazioneTest1.setDataInizio(dataInizio1);
+        prenotazioneTest1.setDataFine(dataFine1);
+        prenotazioneTest1.setNumeroLettini(2);
+        prenotazioneTest1.setPrezzoTotale(10.00);
+
         Prenotazione prenotazioneTest2 = new Prenotazione();
+        prenotazioneTest2.setId(2);
+        prenotazioneTest2.setIdCliente(1);
+        Date dataInizio2 = null;
+        Date dataFine2 = null;
+        try {
+            dataInizio2 = new SimpleDateFormat("dd/MM/yyyy").parse("23/02/2022");
+            dataFine2 = new SimpleDateFormat("dd/MM/yyyy").parse("25/02/2022");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        prenotazioneTest2.setDataInizio(dataInizio2);
+        prenotazioneTest2.setDataFine(dataFine2);
+        prenotazioneTest2.setNumeroLettini(1);
+        prenotazioneTest2.setPrezzoTotale(20.00);
 
-        Date dataStart1 = new GregorianCalendar(2022, Calendar.FEBRUARY, 10).getTime();
-        Date dataEnd1 = new GregorianCalendar(2022, Calendar.FEBRUARY, 12).getTime();
-        int fasciaOraria1 = 3;
+        Prenotazione prenotazioneTest3 = new Prenotazione();
+        prenotazioneTest3.setId(3);
+        prenotazioneTest3.setIdCliente(1);
+        Date dataInizio3 = null;
+        Date dataFine3 = null;
+        try {
+            dataInizio3 = new SimpleDateFormat("dd/MM/yyyy").parse("23/02/2022");
+            dataFine3 = new SimpleDateFormat("dd/MM/yyyy").parse("25/02/2022");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        prenotazioneTest3.setDataInizio(dataInizio2);
+        prenotazioneTest3.setDataFine(dataFine2);
+        prenotazioneTest3.setNumeroLettini(1);
+        prenotazioneTest3.setPrezzoTotale(30.00);
 
-        prenotazioneTest1.setId(0);
-        prenotazioneTest1.setDataInizio(dataStart1);
-        prenotazioneTest1.setDataFine(dataEnd1);
-        prenotazioneTest1.setFasciaOraria(fasciaOraria1);
-        prenotazioneTest1.setNumeroLettini(1);
+        listaPrenTest.add(prenotazioneTest1);
+        listaPrenTest.add(prenotazioneTest2);
+        listaPrenTest.add(prenotazioneTest3);
 
-        Date dataStart2 = new GregorianCalendar(2022, Calendar.FEBRUARY, 7).getTime();
-        Date dataEnd2= new GregorianCalendar(2022, Calendar.FEBRUARY, 14).getTime();
-        int fasciaOraria2 = 1;
-
-        prenotazioneTest2.setId(1);
-        prenotazioneTest2.setDataInizio(dataStart2);
-        prenotazioneTest2.setDataFine(dataEnd2);
-        prenotazioneTest2.setFasciaOraria(fasciaOraria2);
-        prenotazioneTest2.setNumeroLettini(2);
-
-        listaPrenotazioneTest.add(prenotazioneTest1);
-        listaPrenotazioneTest.add(prenotazioneTest2);
-
-        return listaPrenotazioneTest;
+        return listaPrenTest;
     }
 
-    public void aggiugniGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+    public void aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
         System.out.println("Nuova griglia spiaggia aggiunta al database");
     }
 
@@ -163,7 +195,12 @@ public class DBMSController {
         System.out.println("Nuovi prodotti bar aggiunti al database");
     }
 
-    public HashMap<Attrezzatura, Integer> ottieniListaAttrezzature(){
+
+    public HashMap<Attrezzatura, Integer> ottieniAttrezzatureAggiornate() {
+        return null;
+    }
+
+    public HashMap<Attrezzatura, Integer> ottieniMappaAttrezzature(){
         Attrezzatura sdraio = new Attrezzatura("Sdraio", "Roba su cui ci si sdraia");
         Attrezzatura posacenere = new Attrezzatura("Posacenere", "Roba in cui si cicca");
 
@@ -175,4 +212,10 @@ public class DBMSController {
 
     }
 
+    public void aggiornaMappaAttrezzature(HashMap<Attrezzatura, Integer> mappaAttrezzatura) {
+    }
+
+    public ArrayList<Attivita> ottieniListaAttivita() {
+        return null;
+    }
 }
