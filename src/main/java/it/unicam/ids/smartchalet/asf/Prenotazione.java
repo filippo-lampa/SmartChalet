@@ -2,6 +2,7 @@ package it.unicam.ids.smartchalet.asf;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Prenotazione {
     private int id;
@@ -12,6 +13,15 @@ public class Prenotazione {
     private ArrayList<Ombrellone> ombrelloni;
     private int numeroLettini;
     private double prezzoTotale;
+    private HashMap<Date, Integer> mappaDateFasce;
+
+    public void setMappaDateFasce(HashMap<Date, Integer> mappaDateFasce) {
+        this.mappaDateFasce = mappaDateFasce;
+    }
+
+    public HashMap<Date, Integer> getMappaDateFasce() {
+        return mappaDateFasce;
+    }
 
     public int getId() {
         return id;

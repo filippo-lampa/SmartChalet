@@ -1,11 +1,8 @@
-
-.idea/misc.xml
-.idea/modules.xml
-.idea/SmartChalet.iml
-.idea/vcs.xml
+.idea
 .DS_Store
 gradlew
 gradlew.bat
 build.gradle
 build
 gradle
+.gradle

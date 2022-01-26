@@ -1,5 +1,7 @@
 package it.unicam.ids.smartchalet.asf;
 
+import org.w3c.dom.Attr;
+
 import java.util.Date;
 import java.util.HashMap;
 
@@ -134,5 +136,9 @@ public class Attivita {
             if(attrezzatura.getNome().equals(nomeAttrezzatura))
                 return true;
         return false;
+    }
+
+    public void aggiornaPostiDisponibiliAttivita(int numeropartecipanti) {
+        this.setNumeroIscritti(this.getNumeroIscritti()+numeropartecipanti);
     }
 }

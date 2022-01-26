@@ -8,12 +8,15 @@ public class Main {
         Listino listino = new Listino();
         HandlerSpiaggia handlerSpiaggiaTest = new HandlerSpiaggia(spiaggiaTest, dbmsController, listino);
         HandlerListino handlerListino = new HandlerListino(listino, dbmsController, spiaggiaTest);
-        HandlerPrenotazione handlerPrenotazione = new HandlerPrenotazione(spiaggiaTest, dbmsController, listino);
+        HandlerPrenotazione handlerPrenotazione = new HandlerPrenotazione(spiaggiaTest, dbmsController, handlerListino);
+
         ListaAttrezzatura listaAttrezzatura = new ListaAttrezzatura();
         HandlerAttrezzatura handlerAttrezzatura = new HandlerAttrezzatura(listaAttrezzatura, dbmsController);
         ListaAttivita listaAttivita = new ListaAttivita();
         HandlerAttivita handlerAttivita = new HandlerAttivita(listaAttivita, dbmsController, handlerAttrezzatura);
-     /* handlerListino.aggiungiProdottoBar();
+
+        /*
+        handlerListino.aggiungiProdottoBar();
         handlerAttivita.aggiungiAttivita();
         handlerAttrezzatura.aggiungiAttrezzatura();
         handlerAttivita.aggiungiAttivita();
@@ -22,19 +25,18 @@ public class Main {
         handlerSpiaggiaTest.aggiungiGrigliaSpiaggia();
         handlerSpiaggiaTest.aggiungiOmbrellone();
         handlerSpiaggiaTest.modificaGrigliaSpiaggia();
-        handlerSpiaggiaTest.modificaOmbrellone();
+         handlerSpiaggiaTest.modificaOmbrellone();
+
+        handlerPrenotazione.cancellaPrenotazione(1);
         handlerListino.aggiungiProdottoBar();
         handlerListino.modificaFasciaDiPrezzo();
         handlerListino.aggiungiFasciaDiPrezzo();
         handlerListino.modificaFasciaDiPrezzo();
         handlerListino.impostaPrezziOmbrellone();
-     */
-        //handlerAttrezzatura.aggiungiAttrezzatura();
-        //handlerAttrezzatura.rimuoviAttrezzatura();
-
+        handlerAttrezzatura.aggiungiAttrezzatura();
+        handlerAttrezzatura.rimuoviAttrezzatura();
+*/
         handlerPrenotazione.prenotaOmbrellone();
-        //handlerPrenotazione.cancellaPrenotazione();
-
 
     }
 }

@@ -1,5 +1,6 @@
 package it.unicam.ids.smartchalet.asf;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -149,6 +150,10 @@ public class Spiaggia {
             }
         }
         return false;
+    }
+
+    public void aggiornaSpiaggia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        this.listaOmbrelloni = listaOmbrelloni;
     }
 
     @Override

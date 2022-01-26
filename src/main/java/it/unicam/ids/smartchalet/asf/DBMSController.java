@@ -1,8 +1,5 @@
 package it.unicam.ids.smartchalet.asf;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,70 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class DBMSController {
-
-    private Statement stmt = null;
-
-    /**
-     * Costruttore che inizializza un ControllerDB
-     *
-     */
-   /* public DBMSController() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/prova", "root", "");
-            stmt = conn.createStatement();
-            System.out.println("Database is connected !");
-        }catch (SQLException e){
-            System.out.print("Do not connect to DB - Error:"+e);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }*/
-
-    /**
-     * Esegue una query che prevede un output
-     *
-     * @param query query da eseguire
-     * @return un {@link ResultSet} contenente i risultati della query
-     */
-    ResultSet queryWithOutput(String query){
-        try {
-            return stmt.executeQuery(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Esegue una query che non prevede un output
-     *
-     * @param query query da eseguire
-     * @return true se la query &egrave; andata a buon fine, false altrimenti
-     */
-    boolean queryWithoutOutput(String query){
-        try {
-            return stmt.execute(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * Chiude la connessione al database
-     *
-     * @return true se la chiusura della connessione &egrave; andata a buon fine, false altrimenti
-     */
-    boolean closeConnection(){
-        try {
-            stmt.getConnection().close();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
     public ArrayList<ArrayList<Ombrellone>> ottieniVistaSpiaggia() {
         ArrayList<ArrayList<Ombrellone>> matriceOmbrelloni = new ArrayList<ArrayList<Ombrellone>>();
@@ -161,34 +94,17 @@ public class DBMSController {
         return listaPrenTest;
     }
 
-    public void aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+    public boolean aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
         System.out.println("Nuova griglia spiaggia aggiunta al database");
+        return true;
     }
 
-    public Listino ottieniListinoAggiornato() {
-        Listino listino = new Listino();
+    public boolean aggiornaMappaProdottoBar(HashMap<ProdottoBar, Double> listinoBarAggiornato) {
+        return true;
+    }
 
-        String nomeFascia = "FasciaTest";
-        Coordinate coordinateInizio = new Coordinate(0,0);
-        Coordinate coordinateFine = new Coordinate(1,1);
-        double fasciaPrezzo;
+    public void ottieniListinoAggiornato() {
 
-        FasciaDiPrezzo fasciaTest = new FasciaDiPrezzo(nomeFascia, coordinateInizio, coordinateFine);
-
-
-        HashMap<FasciaDiPrezzo, Double> prezziFascia = new HashMap<>() {{
-            put(fasciaTest, 10.0);
-        }};
-        listino.setPrezziFascia(prezziFascia);
-
-        TipologiaOmbrellone tipoTest = new TipologiaOmbrellone("tipologiaTest", "descrizioneTest");
-
-        HashMap<TipologiaOmbrellone, Double> prezziTipologia = new HashMap<>() {{
-            put(tipoTest, 10.0);
-        }};
-        listino.setPrezziTipologia(prezziTipologia);
-
-        return listino;
     }
 
     public void aggiungiProdottiBar(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
@@ -217,5 +133,26 @@ public class DBMSController {
 
     public ArrayList<Attivita> ottieniListaAttivita() {
         return null;
+    }
+
+    public HashMap<ProdottoBar, Double> ottieniMappaProdottiBar() {
+        return null;
+    }
+
+    public void aggiungiOrdineBar(OrdineBar ordineBar) {
+    }
+
+    public ArrayList<OrdineBar> ottieniListaOrdiniBar() {
+        return null;
+    }
+
+    public void aggiornaListaOrdiniBar(ArrayList<OrdineBar> ordiniInSospeso) {
+    }
+
+    public boolean aggiornaListaAttivita(ArrayList<Attivita> ottieniListaAttivitaDisponibili) {
+        return true;
+    }
+
+    public void rimuoviPrenotazioni(ArrayList<Integer> listaPrenotazioniDaRimuovere) {
     }
 }

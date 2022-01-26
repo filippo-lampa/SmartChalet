@@ -103,6 +103,29 @@ public class HandlerSpiaggia {
         }
     }
 
+    public void modificaGrigliaSpiaggia(){
+
+        this.spiaggiaGestita.aggiornaSpiaggia(this.associatedDBMS.ottieniVistaSpiaggia());
+        ArrayList<ArrayList<Ombrellone>> listaOmbrelloni = this.spiaggiaGestita.getListaOmbrelloni();
+        System.out.println(this.spiaggiaGestita.toString());
+
+        boolean flag;
+        do {
+            this.sceltaModificaGriglia(listaOmbrelloni);
+            listaOmbrelloni = this.spiaggiaGestita.getListaOmbrelloni();
+
+            System.out.println("Vuoi modificare ancora la griglia spiaggia? [y/n] ");
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
+        }while(flag);
+
+        if(this.confermaOperazione()){
+            if(this.associatedDBMS.aggiungiGrigliaSpiaggia(this.spiaggiaGestita.getListaOmbrelloni())){
+                System.out.println("Operazione eseguita con successo");
+            }
+            else System.out.println("Operazioni fallita");
+        }
+        else System.out.println("Operazioni annullate");
+    }
 
     private Coordinate selezionaPosto(){
         System.out.println("Inserire la fila");
@@ -319,26 +342,6 @@ public class HandlerSpiaggia {
     private boolean confermaOperazione(){
         System.out.println("Confermi l'operazione? [y/n] ");
         return Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
-    }
-
-    public void modificaGrigliaSpiaggia(){
-
-        this.associatedDBMS.ottieniVistaSpiaggia();
-        //this.spiaggiaGestita.aggiornaSpiaggia();
-        System.out.println(this.spiaggiaGestita.toString());
-        ArrayList<ArrayList<Ombrellone>> listaOmbrelloni = this.spiaggiaGestita.getListaOmbrelloni();
-
-        boolean flag;
-        do {
-            this.sceltaModificaGriglia(listaOmbrelloni);
-            listaOmbrelloni = this.spiaggiaGestita.getListaOmbrelloni();
-
-            System.out.println("Vuoi modificare ancora la griglia spiaggia? [y/n] ");
-            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
-        }while(flag);
-
-        if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
-        else System.out.println("Operazioni annullate");
     }
 
     private void sceltaModificaGriglia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
