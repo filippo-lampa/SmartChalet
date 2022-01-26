@@ -2,6 +2,7 @@ package it.unicam.cs.ids2021;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
 public class Spiaggia {
 
@@ -147,6 +148,7 @@ public class Spiaggia {
     public String toString() {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < this.listaOmbrelloni.size(); i++) {
+            str.append(i).append("\t");
             for (int j = 0; j < this.listaOmbrelloni.get(i).size(); j++) {
                 str.append(this.listaOmbrelloni.get(i).get(j)).append("\t");
             }
@@ -157,5 +159,44 @@ public class Spiaggia {
 
     public void aggiornaSpiaggia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
         this.listaOmbrelloni = listaOmbrelloni;
+    }
+
+    public void aggiungiNuovaRiga(int sceltaRiga, String direzione, int lunghezzaNuovaRiga) {
+        ArrayList<Ombrellone> appoggio = new ArrayList<>(lunghezzaNuovaRiga);
+        if(Objects.equals(direzione, "sopra")){
+            this.listaOmbrelloni.add(sceltaRiga, appoggio);
+            this.modificaCoordinate(sceltaRiga+1);
+        }
+        if(Objects.equals(direzione, "sotto")){
+            if(this.listaOmbrelloni.size()-1 == sceltaRiga) this.listaOmbrelloni.add(appoggio);
+            else{
+                this.listaOmbrelloni.add(sceltaRiga+1, appoggio);
+                this.modificaCoordinate(sceltaRiga+2);
+            }
+        }
+    }
+
+    private void modificaCoordinate(int sceltaRiga){
+        if(this.listaOmbrelloni.size() < sceltaRiga){
+            for(int i = sceltaRiga;i<this.listaOmbrelloni.size();i++){
+                for(Ombrellone ombrellone : this.listaOmbrelloni.get(i)){
+                    if(ombrellone == null) continue;
+                    ombrellone.setLocation(new Coordinate(ombrellone.getLocation().getxAxis(),ombrellone.getLocation().getyAxis()+1));
+                }
+            }
+        }
+    }
+
+    public void eliminaRiga(int sceltaRiga) {
+        this.listaOmbrelloni.remove(sceltaRiga);
+
+        if(this.listaOmbrelloni.size() < sceltaRiga){
+            for(int i = sceltaRiga;i<this.listaOmbrelloni.size();i++){
+                for(Ombrellone ombrellone : this.listaOmbrelloni.get(i)){
+                    if(ombrellone == null) continue;
+                    ombrellone.setLocation(new Coordinate(ombrellone.getLocation().getxAxis(),ombrellone.getLocation().getyAxis()-1));
+                }
+            }
+        }
     }
 }

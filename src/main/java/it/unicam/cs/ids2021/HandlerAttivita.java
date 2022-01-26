@@ -20,15 +20,15 @@ public class HandlerAttivita {
     }
 
     public void aggiungiAttivita(){
-        //    this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniListaAttivita());  //TODO
-        // this.handlerAttrezzaturaAssociato.aggiornaListaAttrezzatura();
+        this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniListaAttivita());
+        this.handlerAttrezzaturaAssociato.aggiornaListaAttrezzatura();
+        System.out.println(this.listaAttivitaAssociata.ottieniListaAttivitaAggiornata().toString());
 
         boolean flag;
         do {
             Attivita attivitaProvvisoria = this.inserisciInformazioniAttivita();
             if(this.listaAttivitaAssociata.isNuovaAttivita(attivitaProvvisoria)){
                 this.associazioneAttrezzatureAdAttivita(attivitaProvvisoria);
-
                 this.listaAttivitaAssociata.aggiungiAttivita(attivitaProvvisoria);
             }
             else System.out.println("L'attivita' che stai cercando di aggiungere e' gia' presente");
@@ -37,7 +37,12 @@ public class HandlerAttivita {
             flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         } while (flag);
 
-        if (this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
+        if(this.confermaOperazione()){
+            if(this.associatedDBMS.aggiornaListaAttivita(this.listaAttivitaAssociata.ottieniListaAttivitaAggiornata())){
+                System.out.println("Operazione eseguita con successo");
+            }
+            else System.out.println("Operazioni fallita");
+        }
         else System.out.println("Operazioni annullate");
 
     }
@@ -135,10 +140,9 @@ public class HandlerAttivita {
     }
 
     private int inserimentoFasciaUtente(){
-        String fascia;
         while(true){
             System.out.print("Inserisci la fascia oraria della nuova attivita (mattina/pomeriggio): ");
-            fascia = sc.nextLine();
+            String fascia = sc.nextLine();
             if(fascia.equals("mattina"))
                 return 1;
             else if(fascia.equals("pomeriggio"))

@@ -22,6 +22,7 @@ public class Attivita {
     private int oreDurata;
 
     public Attivita(int id, String nome, String descrizione, Date data, int maxPartecipanti, String animatore, int oreDurata, int fasciaOraria){
+        this.id = id;
         this.attrezzatureAssociate = new HashMap<>();
         this.nome = nome;
         this.descrizione = descrizione;
@@ -139,6 +140,19 @@ public class Attivita {
             if(attrezzatura.getNome().equals(nomeAttrezzatura))
                 return true;
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Attivita)) return false;
+        Attivita attivita = (Attivita) o;
+        return getId() == attivita.getId() && getFasciaOraria() == attivita.getFasciaOraria() && getNumeroIscritti() == attivita.getNumeroIscritti() && getMaxPartecipanti() == attivita.getMaxPartecipanti() && getOreDurata() == attivita.getOreDurata() && getData().equals(attivita.getData()) && getNome().equals(attivita.getNome()) && Objects.equals(getDescrizione(), attivita.getDescrizione()) && Objects.equals(getAnimatore(), attivita.getAnimatore()) && getAttrezzatureAssociate().equals(attivita.getAttrezzatureAssociate());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getData(), getFasciaOraria(), getNumeroIscritti(), getNome(), getDescrizione(), getMaxPartecipanti(), getAnimatore(), getAttrezzatureAssociate(), getOreDurata());
     }
 
     @Override

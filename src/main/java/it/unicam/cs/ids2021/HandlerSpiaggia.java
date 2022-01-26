@@ -8,9 +8,9 @@ public class HandlerSpiaggia {
 
     private final DBMSController associatedDBMS;
 
-    private HandlerListino handlerListinoAssociato;
+    private final HandlerListino handlerListinoAssociato;
 
-    private Scanner sc;
+    private final Scanner sc;
 
     public HandlerSpiaggia(Spiaggia spiaggiaGestita, DBMSController associatedDBMS, HandlerListino handlerListinoAssociato){
         sc = new Scanner(System.in);
@@ -348,10 +348,9 @@ public class HandlerSpiaggia {
 
     public void modificaGrigliaSpiaggia(){
 
-        this.associatedDBMS.ottieniVistaSpiaggia();
-        //this.spiaggiaGestita.aggiornaSpiaggia();
-        System.out.println(this.spiaggiaGestita.toString());
+        this.spiaggiaGestita.aggiornaSpiaggia(this.associatedDBMS.ottieniVistaSpiaggia());
         ArrayList<ArrayList<Ombrellone>> listaOmbrelloni = this.spiaggiaGestita.getListaOmbrelloni();
+        System.out.println(this.spiaggiaGestita.toString());
 
         boolean flag;
         do {
@@ -362,7 +361,12 @@ public class HandlerSpiaggia {
             flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }while(flag);
 
-        if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
+        if(this.confermaOperazione()){
+            if(this.associatedDBMS.aggiornaMappaSpiaggia(this.spiaggiaGestita.getListaOmbrelloni())){
+                System.out.println("Operazione eseguita con successo");
+            }
+            else System.out.println("Operazioni fallita");
+        }
         else System.out.println("Operazioni annullate");
     }
 
@@ -379,8 +383,25 @@ public class HandlerSpiaggia {
         if(sceltaOperazione == 3){
             this.eliminazioneRiga(listaOmbrelloni,sceltaRiga);
         }
-
+        if(sceltaOperazione == 4){
+            this.aggiuntaRiga(sceltaRiga);
+        }
         System.out.println(this.spiaggiaGestita.toString());
+    }
+
+    private void aggiuntaRiga(int sceltaRiga) {
+        String direzione = "";
+        boolean flag = true;
+        while(flag){
+            System.out.println("Scegli la direzione in cui aggiungere la riga [sopra/sotto]");
+            direzione = this.sc.nextLine().trim().toLowerCase(Locale.ROOT);
+            if(Objects.equals(direzione, "sopra") || Objects.equals(direzione, "sotto")) flag = false;
+            else System.out.println("Cio' che hai inserito non e' accettabile, ritenta");
+        }
+        System.out.println("Scegli la lunghezza della nuova riga (int)");
+        int lunghezzaNuovaRiga = this.provaScannerInt();
+
+        this.spiaggiaGestita.aggiungiNuovaRiga(sceltaRiga,direzione,lunghezzaNuovaRiga);
     }
 
 
@@ -419,7 +440,7 @@ public class HandlerSpiaggia {
     private void eliminazioneRiga(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni, int sceltaRiga) {
         if(this.confermaOperazione()) {
             if (this.isRigaEmpty(listaOmbrelloni.get(sceltaRiga))) {
-                listaOmbrelloni.remove(sceltaRiga);
+                this.spiaggiaGestita.eliminaRiga(sceltaRiga);
             }
             else System.out.println("La fila non può essere eliminata poichè contiene almeno un ombrellone");
         }
@@ -454,10 +475,10 @@ public class HandlerSpiaggia {
 
     private int sceltaOperazioneModificaGriglia(){
         do{
-            System.out.println("Scegli l'operazione da eseguire sulla riga (int)");
-            System.out.println("1\tAllungare la riga\n2\tAccorciare la riga\n3\tEliminare la riga ");
+            System.out.println("Scegli l'operazione da eseguire (int)");
+            System.out.println("1\tAllungare la riga\n2\tAccorciare la riga\n3\tEliminare la riga\n4\tAggiungere una riga ");
             int sceltaOperazione = this.provaScannerInt();
-            if(sceltaOperazione==1 || sceltaOperazione==2 || sceltaOperazione==3) return sceltaOperazione;
+            if(sceltaOperazione==1 || sceltaOperazione==2 || sceltaOperazione==3 || sceltaOperazione==4) return sceltaOperazione;
             else{
                 System.out.println("Il numero inserito non rappresenta un'operazione, ritenta");
             }

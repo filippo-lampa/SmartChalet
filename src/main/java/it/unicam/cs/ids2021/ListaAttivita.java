@@ -73,4 +73,14 @@ public class ListaAttivita {
     public void rimuoviAttivita(Attivita attivitaDaModificare) {
         this.lista.remove(attivitaDaModificare);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("Lista attivita : ").append("\n");
+        for(Attivita attivita : this.lista){
+            str.append(attivita.toString()).append("\n");
+        }
+        return str.toString();
+    }
 }
