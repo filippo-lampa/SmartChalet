@@ -137,4 +137,8 @@ public class Attivita {
                 return true;
         return false;
     }
+
+    public void aggiornaPostiDisponibiliAttivita(int numeropartecipanti) {
+        this.setNumeroIscritti(this.getNumeroIscritti()+numeropartecipanti);
+    }
 }

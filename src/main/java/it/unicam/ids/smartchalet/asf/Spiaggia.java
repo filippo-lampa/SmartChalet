@@ -152,6 +152,10 @@ public class Spiaggia {
         return false;
     }
 
+    public void aggiornaSpiaggia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        this.listaOmbrelloni = listaOmbrelloni;
+    }
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();

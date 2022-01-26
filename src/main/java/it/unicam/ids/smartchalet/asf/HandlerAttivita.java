@@ -310,4 +310,9 @@ public class HandlerAttivita {
         System.out.println("Confermi l'operazione? [y/n] ");
         return Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
     }
+
+    public ArrayList<Attivita> ottieniListaAttivitaDisponibili() {
+        this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniListaAttivita());
+        return this.listaAttivitaAssociata.ottieniListaAttivitaAggiornata();
+    }
 }

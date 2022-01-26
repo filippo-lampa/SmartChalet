@@ -41,6 +41,28 @@ public class Listino {
         this.prezziBar.put(nuovoProdottoBar, prezzoProdotto);
     }
 
+    public Double eliminaProdotto(ProdottoBar prodottoScelto) {
+        return this.getPrezziBar().remove(prodottoScelto);
+    }
+
+    public void aggiornaPrezzoProdotto(ProdottoBar prodottoScelto, double nuovoPrezzo) {
+        this.getPrezziBar().put(prodottoScelto,nuovoPrezzo);
+    }
+
+    public void aggiornaDescrizioneProdotto(ProdottoBar prodottoScelto, String descrizione) {
+        for(ProdottoBar prodotto: this.getPrezziBar().keySet()){
+            if(prodotto.equals(prodottoScelto)) prodotto.setDescrizione(descrizione);
+        }
+    }
+
+    public boolean aggiornaNomeProdotto(ProdottoBar prodottoScelto, String nuovoNome) {
+        for(ProdottoBar prodotto: this.getPrezziBar().keySet()){
+            if(prodotto.getNomeProdotto().equals(nuovoNome)) return false;
+        }
+        prodottoScelto.setNomeProdotto(nuovoNome);
+        return true;
+    }
+
     public HashMap<TipologiaOmbrellone, Double> getPrezziTipologia() {
         return prezziTipologia;
     }

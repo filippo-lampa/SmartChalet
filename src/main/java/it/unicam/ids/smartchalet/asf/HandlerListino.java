@@ -80,6 +80,92 @@ public class HandlerListino {
         } else System.out.println("Operazioni annullate");
     }
 
+    /**
+     * Questo metodo serve per modificare un ProdottoBar presente nel listino
+     */
+    public void modificaProdottoBar(){
+        this.listinoGestito.setPrezziBar(this.associatedDBMS.ottieniMappaProdottiBar());
+        HashMap<ProdottoBar, Double> prezziBar = this.listinoGestito.getPrezziBar();
+        if(prezziBar.isEmpty()) System.out.println("Non ci sono prodotti bar nel listino da modificare");
+        this.mostraListinoBar();
+
+        boolean flag;
+        do {
+            ProdottoBar prodottoScelto = this.sceltaProdottoBar(prezziBar);
+            this.sceltaOperazioneProdottoBar(prodottoScelto);
+            mostraListinoBar();
+            System.out.println("Vuoi aggiungere altri prodotti? [y/n] ");
+            flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
+        } while (flag);
+
+        if (this.confermaOperazione()) {
+            HashMap<ProdottoBar, Double> listinoBarAggiornato = this.listinoGestito.getPrezziBar();
+            if(this.associatedDBMS.aggiornaMappaProdottoBar(listinoBarAggiornato)) System.out.println("Operazione eseguita con successo");
+            else System.out.println("Operazioni fallita");
+        }
+    }
+
+    private void sceltaOperazioneProdottoBar(ProdottoBar prodottoScelto) {
+        System.out.println("Scegli il tipo di modifica da effettuare: ");
+        System.out.println("1 : Modifica nome prodotto \n2 : Modifica descrizione prodotto \n3 : Modifica prezzo prodotto \n4 : Elimina prodotto ");
+        boolean flag = true;
+        while (flag) {
+            int scelta = this.provaScannerInt();
+            if (scelta == 1) this.modificaNomeProdotto(prodottoScelto);
+            else if (scelta == 2) this.modificaDescrizioneProdotto(prodottoScelto);
+            else if (scelta == 3) this.modificaPrezzoProdotto(prodottoScelto);
+            else if (scelta == 4) this.eliminaProdotto(prodottoScelto);
+            else {
+                System.out.println(" Non hai selezionato una scelta esistente, ritenta ");
+                continue;
+            }
+            flag = false;
+        }
+    }
+
+    private void modificaNomeProdotto(ProdottoBar prodottoScelto) {
+        System.out.println("Inserisci il nuovo nome: ");
+        String nuovoNome = this.sc.nextLine();
+        if(!this.listinoGestito.aggiornaNomeProdotto(prodottoScelto,nuovoNome)){
+            System.out.println("Nome prodotto presente, le operazioni verranno annullate");
+        }
+    }
+
+    private void modificaDescrizioneProdotto(ProdottoBar prodottoScelto) {
+        System.out.println("Inserisci la nuova descrizione: ");
+        String descrizione = this.sc.nextLine();
+        this.listinoGestito.aggiornaDescrizioneProdotto(prodottoScelto,descrizione);
+    }
+
+    private void modificaPrezzoProdotto(ProdottoBar prodottoScelto) {
+        System.out.println("Prezzo attuale prodotto : "+this.listinoGestito.getPrezziBar().get(prodottoScelto));
+        System.out.println("Inserisci nuovo prezzo: ");
+        double nuovoPrezzo = this.provaScannerDouble();
+        this.listinoGestito.aggiornaPrezzoProdotto(prodottoScelto, nuovoPrezzo);
+    }
+
+    private void eliminaProdotto(ProdottoBar prodottoScelto) {
+        if(this.confermaOperazione()){
+            if(this.listinoGestito.eliminaProdotto(prodottoScelto) != null) System.out.println("Prodotto eliminato");
+            else System.out.println("Operazione fallita");
+        }
+        else System.out.println("Operazione annullato");
+    }
+
+    private ProdottoBar sceltaProdottoBar(HashMap<ProdottoBar, Double> prezziBar) {
+        System.out.println("Inserire l'id del prodotto che vuoi modificare (int)");
+        int idProdotto = this.provaScannerInt();
+
+        for( ProdottoBar prodottoBar: prezziBar.keySet()){
+            if(prodottoBar.getIdProdotto() == idProdotto) return prodottoBar;
+        }
+
+        System.out.println("Non hai selezionato nessun prodotto esistente");
+        this.mostraListinoBar();
+        return this.sceltaProdottoBar(prezziBar);
+    }
+
+
     private void aggiungiFasciaAListino(FasciaDiPrezzo nuovaFascia) {
         String nomeStringa;
         Double fasciaPrezzo;
@@ -340,4 +426,32 @@ public class HandlerListino {
         return yPrimoTemporanea < yUltimoTemporanea || (yPrimoTemporanea == yUltimoTemporanea && xPrimoTemporanea < xUltimoTemporanea);
     }
 
+    public HashMap<ProdottoBar, Double> getPrezziBar() {
+        this.listinoGestito.setPrezziBar(this.associatedDBMS.ottieniMappaProdottiBar());
+        return this.listinoGestito.getPrezziBar();
+    }
+
+    private int provaScannerInt(){
+        while(true){
+            try{
+                int intero = this.sc.nextInt();
+                this.sc.nextLine();
+                return intero;
+            } catch (Exception e) {
+                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
+            }
+        }
+    }
+
+    private double provaScannerDouble(){
+        while(true){
+            try{
+                double numero = this.sc.nextDouble();
+                this.sc.nextLine();
+                return numero;
+            } catch (Exception e) {
+                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
+            }
+        }
+    }
 }

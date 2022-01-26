@@ -3,7 +3,7 @@ package it.unicam.ids.smartchalet.asf;
 public class Main {
 
     public static void main(String[] args) {
-        DBMSController dbmsController = new DBMSController();
+/*        DBMSController dbmsController = new DBMSController();
         Spiaggia spiaggiaTest = new Spiaggia();
         HandlerPrenotazione handlerPrenotazione = new HandlerPrenotazione(spiaggiaTest, dbmsController);
         Listino listino = new Listino();
@@ -14,24 +14,24 @@ public class Main {
         ListaAttivita listaAttivita = new ListaAttivita();
         HandlerAttivita handlerAttivita = new HandlerAttivita(listaAttivita, dbmsController, handlerAttrezzatura);
         handlerListino.aggiungiProdottoBar();
-//        handlerAttivita.aggiungiAttivita();
-     /*   handlerAttrezzatura.aggiungiAttrezzatura();
         handlerAttivita.aggiungiAttivita();
-        handlerAttivita.modificaAttivita();*/
+        handlerAttrezzatura.aggiungiAttrezzatura();
+        handlerAttivita.aggiungiAttivita();
+        handlerAttivita.modificaAttivita();
         handlerSpiaggiaTest.aggiungiTipologiaOmbrellone();
         handlerSpiaggiaTest.aggiungiGrigliaSpiaggia();
         handlerSpiaggiaTest.aggiungiOmbrellone();
         handlerSpiaggiaTest.modificaGrigliaSpiaggia();
-     /*    handlerSpiaggiaTest.modificaOmbrellone();
+         handlerSpiaggiaTest.modificaOmbrellone();
         handlerPrenotazione.prenotaOmbrellone();
         handlerListino.aggiungiProdottoBar();
         handlerListino.modificaFasciaDiPrezzo();
         handlerListino.aggiungiFasciaDiPrezzo();
         handlerListino.modificaFasciaDiPrezzo();
-        handlerListino.impostaPrezziOmbrellone();*/
+        handlerListino.impostaPrezziOmbrellone();
         handlerAttrezzatura.aggiungiAttrezzatura();
         handlerAttrezzatura.rimuoviAttrezzatura();
-
+*/
 
     }
 }

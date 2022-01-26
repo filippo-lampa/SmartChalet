@@ -8,51 +8,68 @@ public class DBMSController {
 
     private Statement stmt = null;
 
+    private String url = "jdbc:postgresql://localhost/SmartChalet";
+    private String user = "Filippo";
+    private String password = "smartchaletasf";
+    private Connection conn = null;
+    private static DBMSController instance = null;
+
     /**
      * Costruttore che inizializza un ControllerDB
      *
      */
-   /* public DBMSController() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/prova", "root", "");
-            stmt = conn.createStatement();
-            System.out.println("Database is connected !");
-        }catch (SQLException e){
-            System.out.print("Do not connect to DB - Error:"+e);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }*/
+    private DBMSController() {
+    }
 
-    /**
-     * Esegue una query che prevede un output
-     *
-     * @param query query da eseguire
-     * @return un {@link ResultSet} contenente i risultati della query
-     */
-    ResultSet queryWithOutput(String query){
-        try {
-            return stmt.executeQuery(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void setDBMSController(String url, String user, String password){
+        this.url = url;
+        this.user = user;
+        this.password = password;
+    }
+
+    public static DBMSController getInstance(){
+        if(instance == null){
+            instance = new DBMSController();
         }
-        return null;
+        return instance;
     }
 
     /**
-     * Esegue una query che non prevede un output
+     * Connect to the PostgreSQL database
      *
-     * @param query query da eseguire
-     * @return true se la query &egrave; andata a buon fine, false altrimenti
+     * @return a Connection object
      */
-    boolean queryWithoutOutput(String query){
-        try {
-            return stmt.execute(query);
-        } catch (SQLException e) {
+    private void connect() {
+        try{
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e){
+            System.out.println("Where is your PostgreSQL JDBC Driver? Include it in your library path");
             e.printStackTrace();
         }
-        return false;
+        try {
+            this.conn = DriverManager.getConnection(url, user, password);
+            System.out.println("Connected to the PostgreSQL server successfully.");
+        } catch (SQLException e) {
+            System.out.println("Problems in operning a connection to the DB");
+            e.printStackTrace();
+        }
+    }
+
+    public boolean DBTest(){
+        Boolean result = true;
+        try{
+            if(conn == null || !conn.isClosed()){
+                this.connect();
+                result = false;
+            }
+            DatabaseMetaData data = conn.getMetaData();
+            System.out.println("Details on DBMS: - " + data.getDatabaseProductName() + "\n" + " version: " + data.getDatabaseProductVersion()
+            + " schemas: " + data.getSchemas().getRow() + "\n");
+            this.closeConnection();
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return result;
     }
 
     /**
@@ -60,14 +77,13 @@ public class DBMSController {
      *
      * @return true se la chiusura della connessione &egrave; andata a buon fine, false altrimenti
      */
-    boolean closeConnection(){
+    private void closeConnection(){
         try {
-            stmt.getConnection().close();
-            return true;
+            conn.close();
         } catch (SQLException e) {
+            System.out.println("Problems in closing the connection to the DB");
             e.printStackTrace();
         }
-        return false;
     }
 
     public ArrayList<ArrayList<Ombrellone>> ottieniVistaSpiaggia() {
@@ -75,11 +91,31 @@ public class DBMSController {
     }
 
     public ArrayList<Prenotazione> richiestaListaPrenotazioni() {
-        return null;
+        String SQL = "SELECT * FROM prenotazione";
+        ArrayList<Prenotazione> prenotazioni = new ArrayList<>();
+        Prenotazione prenotazione;
+        int i;
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(SQL);) {
+            while (rs.next()) {
+                //i = 1;
+                prenotazione = new Prenotazione(rs.getDate(3), rs.getDate(4), rs.getInt(1));
+                prenotazioni.add(prenotazione);
+            }
+        } catch (SQLException ex){
+            ex.printStackTrace();
+        }
+        return prenotazioni;
     }
 
-    public void aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
+    public boolean aggiungiGrigliaSpiaggia(ArrayList<ArrayList<Ombrellone>> grigliaSpiaggia) {
         System.out.println("Nuova griglia spiaggia aggiunta al database");
+        return true;
+    }
+
+    public boolean aggiornaMappaProdottoBar(HashMap<ProdottoBar, Double> listinoBarAggiornato) {
+        return true;
     }
 
     public void ottieniListinoAggiornato() {
@@ -112,5 +148,37 @@ public class DBMSController {
 
     public ArrayList<Attivita> ottieniListaAttivita() {
         return null;
+    }
+
+
+    public static void main(String[] args) {
+        DBMSController controller = new DBMSController();
+        controller.DBTest();
+        for(Prenotazione prenotazione : controller.richiestaListaPrenotazioni()) {
+            System.out.println(prenotazione.getIdCliente());
+            System.out.println(prenotazione.getDataInizio());
+            System.out.println(prenotazione.getDataFine());
+        }
+    }
+
+    public HashMap<ProdottoBar, Double> ottieniMappaProdottiBar() {
+        return null;
+    }
+
+    public void aggiungiOrdineBar(OrdineBar ordineBar) {
+    }
+
+    public ArrayList<OrdineBar> ottieniListaOrdiniBar() {
+        return null;
+    }
+
+    public void aggiornaListaOrdiniBar(ArrayList<OrdineBar> ordiniInSospeso) {
+    }
+
+    public boolean aggiornaListaAttivita(ArrayList<Attivita> ottieniListaAttivitaDisponibili) {
+        return true;
+    }
+
+    public void rimuoviPrenotazioni(ArrayList<Integer> listaPrenotazioniDaRimuovere) {
     }
 }
