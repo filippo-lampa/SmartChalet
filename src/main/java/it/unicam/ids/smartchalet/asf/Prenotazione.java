@@ -11,17 +11,11 @@ public class Prenotazione {
     private Date dataFine;
     private int idCliente;
     private ArrayList<Ombrellone> ombrelloni;
-    private int numeroLettini;
     private double prezzoTotale;
     private HashMap<Date, Integer> mappaDateFasce;
+    private HashMap<Date, ArrayList<Ombrellone>> mappaDateListaOmbrelloni;
 
-    public void setMappaDateFasce(HashMap<Date, Integer> mappaDateFasce) {
-        this.mappaDateFasce = mappaDateFasce;
-    }
 
-    public HashMap<Date, Integer> getMappaDateFasce() {
-        return mappaDateFasce;
-    }
 
     public int getId() {
         return id;
@@ -71,19 +65,27 @@ public class Prenotazione {
         this.ombrelloni = ombrelloni;
     }
 
-    public int getNumeroLettini() {
-        return numeroLettini;
-    }
-
-    public void setNumeroLettini(int numeroLettini) {
-        this.numeroLettini = numeroLettini;
-    }
-
     public double getPrezzoTotale() {
         return prezzoTotale;
     }
 
     public void setPrezzoTotale(double prezzoTotale) {
         this.prezzoTotale = prezzoTotale;
+    }
+
+    public void setMappaDateFasce(HashMap<Date, Integer> mappaDateFasce) {
+        this.mappaDateFasce = mappaDateFasce;
+    }
+
+    public HashMap<Date, Integer> getMappaDateFasce() {
+        return mappaDateFasce;
+    }
+
+    public HashMap<Date, ArrayList<Ombrellone>> getMappaDateListaOmbrelloni() {
+        return mappaDateListaOmbrelloni;
+    }
+
+    public void setMappaDateListaOmbrelloni(HashMap<Date, ArrayList<Ombrellone>> mappaDateListaOmbrelloni) {
+        this.mappaDateListaOmbrelloni = mappaDateListaOmbrelloni;
     }
 }

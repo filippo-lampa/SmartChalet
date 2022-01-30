@@ -17,6 +17,8 @@ public class Cliente {
         this.handlerPrenotazioneAssociato.ordinaBar(this.id);
     }
 
+    public void prenotaOmbrellone() {this.handlerPrenotazioneAssociato.prenotaOmbrellone(this.id);}
+
     public void cancellaPrenotazione(){
         this.handlerPrenotazioneAssociato.cancellaPrenotazione(this.id);
     }

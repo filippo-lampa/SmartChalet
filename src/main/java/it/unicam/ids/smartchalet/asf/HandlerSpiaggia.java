@@ -137,23 +137,9 @@ public class HandlerSpiaggia {
         return new Coordinate(fila, colonna);
     }
 
-    private void ottieniVistaSpiaggia(){
-        ArrayList<ArrayList<Ombrellone>> vistaSpiaggiaCorrente = spiaggiaGestita.getListaOmbrelloni();
-        int posizioneOmbrelloneCounter = 0;
-        for(ArrayList<Ombrellone> currentRow : vistaSpiaggiaCorrente) {
-            for (Ombrellone currentOmbrellone : currentRow) {
-                    System.out.println("Posizione numero: " + posizioneOmbrelloneCounter);
-                if (currentOmbrellone != null) {
-                    System.out.println("\t" + " (Coordinate " + currentOmbrellone.getLocation().getxAxis() + " " + currentOmbrellone.getLocation().getyAxis() + " )");
-                    System.out.println("\t" + " Id ombrellone: " + currentOmbrellone.getIdOmbrellone());
-                    System.out.println("\t" + " Tipo: " + currentOmbrellone.getNomeTipo() + " ");
-                    System.out.println("\t" + " Numero lettini associati: " + currentOmbrellone.getNumeroLettiniAssociati() + " ");
-                    System.out.println("\t" + " L'ombrellone è prenotato: " + currentOmbrellone.isBooked() + " ");
-                }
-                else System.out.println("\t" + "Posizione vuota, nessun ombrellone piazzato");
-                posizioneOmbrelloneCounter++;
-            }
-        }
+    public ArrayList<ArrayList<Ombrellone>> ottieniVistaSpiaggia() {
+        this.spiaggiaGestita.aggiornaSpiaggia(this.associatedDBMS.ottieniVistaSpiaggia());
+        return this.spiaggiaGestita.getListaOmbrelloni();
     }
 
     private Ombrellone selezionaOmbrellone(int idOmbrellone){
@@ -440,6 +426,18 @@ public class HandlerSpiaggia {
                 System.out.println("Il numero inserito non rappresenta un'operazione, ritenta");
             }
         }while(true);
+    }
+
+    public Ombrellone getOmbrellone(int idOmbrellone) {
+        for(ArrayList<Ombrellone> currentRow: spiaggiaGestita.getListaOmbrelloni())
+            for(Ombrellone ombrelloneCorrente : currentRow)
+                if(ombrelloneCorrente == null)
+                    continue;
+                else{
+                    if(ombrelloneCorrente.getIdOmbrellone() == idOmbrellone)
+                        return ombrelloneCorrente;
+                }
+        return null;
     }
 
     private int provaScannerInt(){

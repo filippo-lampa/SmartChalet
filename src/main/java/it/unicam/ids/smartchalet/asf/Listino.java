@@ -9,24 +9,14 @@ public class Listino {
     private HashMap<ProdottoBar, Double> prezziBar;
     private HashMap<FasciaDiPrezzo, Double> prezziFascia;
     private double prezzoBaseOmbrellone;
+    private double prezzoBaseLettino;
 
     public Listino(){
         prezziTipologia = new HashMap<>();
         prezziBar = new HashMap<>();
         prezziFascia = new HashMap<>();
         prezzoBaseOmbrellone = 10.00;
-    }
-
-    public double calcolaPrezzoPrenotazione(int idTipologia, String nomeFascia) {
-        FasciaDiPrezzo fascia = null;
-        for(FasciaDiPrezzo fasciaCorrente : this.prezziFascia.keySet())
-            if(fasciaCorrente.getNome().equals(nomeFascia))
-                fascia = fasciaCorrente;
-        for(TipologiaOmbrellone tipologia : this.prezziTipologia.keySet())
-            if(tipologia.getId() == idTipologia)
-                return prezzoBaseOmbrellone * prezziTipologia.get(tipologia) * prezziFascia.get(fascia) ;
-        System.out.println("La tipologia su cui calcolare il prezzo della prenotazione non esiste");
-        return -1;
+        prezzoBaseLettino = 5.00;
     }
 
     public void aggiornaListino(HashMap<ProdottoBar,Double> listinoBarAggiornato) {
@@ -102,6 +92,14 @@ public class Listino {
         this.prezzoBaseOmbrellone = prezzoBaseOmbrellone;
     }
 
+    public double getPrezzoBaseLettino() {
+        return prezzoBaseLettino;
+    }
+
+    public void setPrezzoBaseLettino(double prezzoBaseLettino) {
+        this.prezzoBaseLettino = prezzoBaseLettino;
+    }
+
     public void eliminaFasciaDiPrezzo(FasciaDiPrezzo fasciaDaModificare) {
         this.prezziFascia.remove(fasciaDaModificare);
     }
@@ -112,7 +110,7 @@ public class Listino {
 
     public void mostraFasceEPrezzi() {
         for (Map.Entry<FasciaDiPrezzo, Double> entry : this.prezziFascia.entrySet()) {
-            System.out.println(("Fascia " + entry.getKey().getNome() + " - costo: " + entry.getValue() + "."));
+            System.out.println(("Fascia " + entry.getKey().getNome() + " - costo: " + entry.getValue()+" Inizio: "+entry.getKey().getCoordinateInizio().toString() +" Fine: "+entry.getKey().getCoordinateFine().toString()+"."));
         }
     }
 

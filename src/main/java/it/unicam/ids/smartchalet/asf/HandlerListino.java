@@ -47,18 +47,20 @@ public class HandlerListino {
     }
 
     public void aggiungiFasciaDiPrezzo() {
-        //ArrayList<ArrayList<Ombrellone>> vistaSpiaggia = associatedDBMS.ottieniVistaSpiaggia(); //TODO call a db e comunicazione handler
+        ArrayList<ArrayList<Ombrellone>> vistaSpiaggia = associatedDBMS.ottieniVistaSpiaggia(); //TODO call a db e comunicazione handler
         //handlerSpiaggia.ottieniVistaSpiaggia(vistaSpiaggia);
-        //TODO: inserire l'arrayList di arrayList di Ombrelloni nell'oggetto spiaggia?
-        //listinoGestito = associatedDBMS.ottieniListinoAggiornato(); //TODO call a db
+        listinoGestito = associatedDBMS.ottieniListinoAggiornato(); //TODO call a db
+        HashMap<FasciaDiPrezzo, Double> prezziFasce;
+        prezziFasce = listinoGestito.getPrezziFascia();
 
         this.listinoGestito.mostraFasceEPrezzi();
 
         boolean working = true;
 
         while (working) {
-
+            System.out.println("Scegliere il primo ombrellone della nuova fascia");
             Coordinate coordinateInizio = this.selezionaPosto();
+            System.out.println("Scegliere l'ultimo ombrellone della nuova fascia");
             Coordinate coordinateFine = this.selezionaPosto();
             FasciaDiPrezzo nuovaFascia = new FasciaDiPrezzo("temporanea", coordinateInizio, coordinateFine);
             if (!this.controlloCoordinate(nuovaFascia)) {
@@ -78,6 +80,28 @@ public class HandlerListino {
         if (this.confermaOperazione()) {
             System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database//
         } else System.out.println("Operazioni annullate");
+    }
+
+    private boolean controlloCoordinate(FasciaDiPrezzo fasciaTemporanea) {
+        int yPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getyAxis();
+        int xPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getxAxis();
+        int yUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getyAxis();
+        int xUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getxAxis();
+        return yPrimoTemporanea < yUltimoTemporanea || (yPrimoTemporanea == yUltimoTemporanea && xPrimoTemporanea < xUltimoTemporanea);
+    }
+
+    private boolean controlloLocazioni(FasciaDiPrezzo fasciaDaModificare, FasciaDiPrezzo fasciaTemporanea) {
+
+        for (FasciaDiPrezzo fasciaAttuale : this.listinoGestito.getPrezziFascia().keySet()) {
+            if (fasciaAttuale == fasciaDaModificare) continue;
+
+            FasciaDiPrezzo appoggio1 = new FasciaDiPrezzo("Temporanea1", fasciaAttuale.getCoordinateInizio(), fasciaTemporanea.getCoordinateFine());
+            FasciaDiPrezzo appoggio2 = new FasciaDiPrezzo("Temporanea2", fasciaTemporanea.getCoordinateInizio(), fasciaAttuale.getCoordinateFine());
+            if (this.controlloCoordinate(appoggio1) || this.controlloCoordinate(appoggio2)) continue;
+
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -168,7 +192,7 @@ public class HandlerListino {
 
     private void aggiungiFasciaAListino(FasciaDiPrezzo nuovaFascia) {
         String nomeStringa;
-        Double fasciaPrezzo;
+        Double fasciaPrezzo = null;
 
         do {
             System.out.println("Inserire il nome della fascia di prezzo: ");
@@ -176,11 +200,14 @@ public class HandlerListino {
         } while (!listinoGestito.isNomeDisponibile(nomeStringa));
         nuovaFascia.setNome(nomeStringa);
 
-        do {
+        boolean okIlPrezzoEGiusto = false;
+        while (!okIlPrezzoEGiusto){
             System.out.println("Inserire il prezzo della fascia di prezzo: ");
-            fasciaPrezzo = this.sc.nextDouble();
-            this.sc.nextLine();
-        } while (!this.isPrezzoNegativo(fasciaPrezzo));
+            fasciaPrezzo = provaScannerDouble();
+            if (!this.isPrezzoNegativo(fasciaPrezzo)){
+                okIlPrezzoEGiusto = true;
+            }
+        }
 
         this.listinoGestito.addPrezziFascia(nuovaFascia, fasciaPrezzo);
         this.listinoGestito.mostraFasceEPrezzi();
@@ -229,10 +256,21 @@ public class HandlerListino {
         else System.out.println("Operazioni annullate");
     }
 
+    /**
+     * @param prezzo da verificare
+     * @return true se il prezzo inserito è negativo
+     */
+    private boolean isPrezzoNegativo(Double prezzo) {
+        if(Double.compare(prezzo, 0.0) < 0){
+            System.out.println("Il prezzo inserito è negativo");
+            return true;
+        }
+        return false;
+    }
 
     public void impostaPrezziOmbrellone() {
-        //this.associatedDBMS.ottieniListinoAggiornato();
-        //this.listinoGestito.aggiornaListino(); //TODO
+        Listino listino = this.associatedDBMS.ottieniListinoAggiornato();
+        this.listinoGestito = listino;
         boolean working = true;
         while (working) {
             sceltaOperazione();
@@ -246,6 +284,7 @@ public class HandlerListino {
         else System.out.println("Operazioni annullate");
     }
 
+
     private void sceltaOperazione() {
         boolean working = true;
         int answer;
@@ -253,6 +292,7 @@ public class HandlerListino {
         System.out.println("Scegliere il prezzo da modificare: ");
         System.out.println("[1]: Prezzo Base");
         System.out.println("[2]: Tipologie");
+        System.out.println("[3]: Prezzo lettino");
         do {
             answer = this.sc.nextInt();
             sc.nextLine();
@@ -262,18 +302,13 @@ public class HandlerListino {
             } else if (answer == 2) {
                 sceltaPrezzoTipologie();
                 working = false;
+            } else if (answer == 3) {
+                sceltaPrezzoLettino();
+                working = false;
             } else {
-                System.out.println("Reinserire (1 o 2): ");
+                System.out.println("Reinserire (1, 2 o 3): ");
             }
         } while (working);
-    }
-
-    private boolean isPrezzoNegativo(Double prezzo) {
-        if(Double.compare(prezzo, 0.0) < 0){
-            System.out.println("Il prezzo inserito è negativo");
-            return true;
-        }
-        return false;
     }
 
     private void sceltaPrezzoBase() {
@@ -284,16 +319,6 @@ public class HandlerListino {
         System.out.println("Il nuovo prezzo base degli ombrelloni è " + nuovoPrezzoBase + ".\n");
     }
 
-    private double sceltaPrezzo(){
-        double nuovoPrezzo;
-        do{
-            System.out.println("Inserire il nuovo prezzo: ");
-            nuovoPrezzo = this.sc.nextDouble();
-            this.sc.nextLine();
-        }while(isPrezzoNegativo(nuovoPrezzo));
-        return nuovoPrezzo;
-    }
-
     private void sceltaPrezzoTipologie() {
         HashMap<TipologiaOmbrellone, Double> prezziTipologia = listinoGestito.getPrezziTipologia();
         double nuovoPrezzoTipologia;
@@ -301,7 +326,7 @@ public class HandlerListino {
         String nomeTipologia = null;
 
         while (!risultatoSoddisfacente) {
-            System.out.println("Scegliere la tipologia di cui modificare il prezzo: ");
+            System.out.println("Inserire il nome della tipologia di cui modificare il prezzo: ");
             this.listinoGestito.outputListaTipologie();
             nomeTipologia = this.sc.nextLine();
             for(TipologiaOmbrellone tipologia : prezziTipologia.keySet()){
@@ -313,6 +338,24 @@ public class HandlerListino {
         }
         nuovoPrezzoTipologia = sceltaPrezzo();
         this.listinoGestito.setNuovoPrezzoTipologia(nomeTipologia, nuovoPrezzoTipologia);
+    }
+
+    private void sceltaPrezzoLettino() {
+        double nuovoPrezzoLettino;
+        System.out.println("Il precedente prezzo dei lettini è " + listinoGestito.getPrezzoBaseLettino() + ".");
+        nuovoPrezzoLettino = sceltaPrezzo();
+        listinoGestito.setPrezzoBaseLettino(nuovoPrezzoLettino);
+        System.out.println("Il nuovo prezzo dei lettini è " + nuovoPrezzoLettino + ".\n");
+    }
+
+    private double sceltaPrezzo(){
+        double nuovoPrezzo;
+        do{
+            System.out.println("Inserire il nuovo prezzo: ");
+            nuovoPrezzo = this.sc.nextDouble();
+            this.sc.nextLine();
+        }while(isPrezzoNegativo(nuovoPrezzo));
+        return nuovoPrezzo;
     }
 
     private FasciaDiPrezzo selezioneFascia() {
@@ -404,28 +447,6 @@ public class HandlerListino {
     }
 
 
-    private boolean controlloLocazioni(FasciaDiPrezzo fasciaDaModificare, FasciaDiPrezzo fasciaTemporanea) {
-
-        for (FasciaDiPrezzo fasciaAttuale : this.listinoGestito.getPrezziFascia().keySet()) {
-            if (fasciaAttuale == fasciaDaModificare) continue;
-
-            FasciaDiPrezzo appoggio1 = new FasciaDiPrezzo("Temporanea1", fasciaAttuale.getCoordinateFine(), fasciaTemporanea.getCoordinateInizio());
-            FasciaDiPrezzo appoggio2 = new FasciaDiPrezzo("Temporanea2", fasciaTemporanea.getCoordinateFine(), fasciaAttuale.getCoordinateInizio());
-            if (this.controlloCoordinate(appoggio1) || this.controlloCoordinate(appoggio2)) continue;
-
-            return false;
-        }
-        return true;
-    }
-
-    private boolean controlloCoordinate(FasciaDiPrezzo fasciaTemporanea) {
-        int yPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getyAxis();
-        int xPrimoTemporanea = fasciaTemporanea.getCoordinateInizio().getxAxis();
-        int yUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getyAxis();
-        int xUltimoTemporanea = fasciaTemporanea.getCoordinateFine().getxAxis();
-        return yPrimoTemporanea < yUltimoTemporanea || (yPrimoTemporanea == yUltimoTemporanea && xPrimoTemporanea < xUltimoTemporanea);
-    }
-
     public HashMap<ProdottoBar, Double> getPrezziBar() {
         this.listinoGestito.setPrezziBar(this.associatedDBMS.ottieniMappaProdottiBar());
         return this.listinoGestito.getPrezziBar();
@@ -453,5 +474,19 @@ public class HandlerListino {
                 System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
             }
         }
+    }
+
+    public double ottieniPrezzoBaseOmbrellone() {
+        return this.listinoGestito.getPrezzoBaseOmbrellone();
+    }
+
+    public double ottieniPrezzoLettino() {return this.listinoGestito.getPrezzoBaseLettino(); }
+
+    public HashMap<FasciaDiPrezzo, Double> ottieniPrezziFasce() {
+        return this.listinoGestito.getPrezziFascia();
+    }
+
+    public HashMap<TipologiaOmbrellone, Double> getTipologie() {
+        return this.listinoGestito.getPrezziTipologia();
     }
 }

@@ -15,14 +15,16 @@ public class HandlerPrenotazione {
     private HashMap<ProdottoBar, Integer> carrello;
     private ArrayList<String> codiciCouponValidi;
     private HandlerAttivita handlerAttivitaAssociato;
+    private HandlerSpiaggia handlerSpiaggiaAssociato;
     private HandlerListino handlerListino;
 
-    public HandlerPrenotazione(Spiaggia spiaggiaAssociata, DBMSController associatedDBMS, HandlerListino handlerListinoAssociato) {
+    public HandlerPrenotazione(Spiaggia spiaggiaAssociata, DBMSController associatedDBMS, HandlerListino handlerListinoAssociato, HandlerSpiaggia handlerSpiaggiaAssociato) {
         this.codiciCouponValidi = new ArrayList<>();
         this.spiaggiaAssociata = spiaggiaAssociata;
         listaPrenotazioni = new ArrayList<>();
         this.associatedDBMS = associatedDBMS;
         this.handlerListino = handlerListinoAssociato;
+        this.handlerSpiaggiaAssociato =  handlerSpiaggiaAssociato;
 
     }
 
@@ -91,18 +93,6 @@ public class HandlerPrenotazione {
 
     }
 
-    private int provaScannerInt(){
-        while(true){
-            try{
-                int intero = this.sc.nextInt();
-                this.sc.nextLine();
-                return intero;
-            } catch (Exception e) {
-                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
-            }
-        }
-    }
-
     private void outputListaAttivitaDisponibili(ArrayList<Attivita> listaAttivitaDisponibili) {
         for(Attivita attivita : listaAttivitaDisponibili){
             System.out.println(attivita.toString());
@@ -140,12 +130,11 @@ public class HandlerPrenotazione {
         while (working) {
             System.out.println("Inserire l'id della prenotazione da cancellare:");
             outputListaPrenotazioniCliente(listaPrenotazioni, idCliente);
-            int idPrenotazione = sc.nextInt();
-            sc.nextLine();
+            int idPrenotazione = provaScannerInt();
             Prenotazione prenotazioneDaRimuovere = this.ottieniPrenotazione(idPrenotazione);
             if(prenotazioneDaRimuovere == null){
                 System.out.println("Prenotazione scelta non valida.");
-            }else if (prenotazioneDaRimuovere.getIdCliente() == idCliente) {
+            } else if (prenotazioneDaRimuovere.getIdCliente() == idCliente) {
                 System.out.println("Vuoi davvero cancellare la prenotazione con id ["+prenotazioneDaRimuovere.getId()+"]? [y/n] ");
                 if (Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y")) {
                     prezzoDaRimborsare = prezzoDaRimborsare+prenotazioneDaRimuovere.getPrezzoTotale();
@@ -176,134 +165,157 @@ public class HandlerPrenotazione {
         return null;
     }
 
-    public void prenotaOmbrellone() {
-        prenotazioneInCorso = new Prenotazione();
-        spiaggiaAssociata.aggiungiGrigliaSpiaggia(associatedDBMS.ottieniVistaSpiaggia());
+    public void prenotaOmbrellone(int idCliente) {
         listaPrenotazioni = associatedDBMS.richiestaListaPrenotazioni();
-        inserisciOrarioDesiderato();
-        associaFasciaOrario(prenotazioneInCorso.getDataInizio(), prenotazioneInCorso.getDataFine());
+        boolean dataCorretta = false;
+        Date dataInizioPrenotazione = null;
+        Date dataFinePrenotazione = null;
+        while (!dataCorretta) {
+            dataInizioPrenotazione = inserisciDataInizioDesiderata();
+            dataFinePrenotazione = inserisciDataFineDesiderata();
 
-        //ottieniPrezziFasce()
-        //ottieniPrezzoBase()
-        //getTipologie()
+            if (controlloDataCorretta(dataInizioPrenotazione, dataFinePrenotazione)) {
+                dataCorretta = true;
+            }
+        }
+        HashMap<Date, Integer> mappaDateFasceTemp;
+        mappaDateFasceTemp = associaFasciaOrario(dataInizioPrenotazione, dataFinePrenotazione);
 
-        Map<Date, Integer> m1 = new TreeMap(prenotazioneInCorso.getMappaDateFasce());
+        // questa roba è inutile dato che i prezzi vengono presi all'interno dei metodi del calcolo di prezzo
+        double prezzoBaseAttuale = handlerListino.ottieniPrezzoBaseOmbrellone();
+        HashMap<FasciaDiPrezzo, Double> prezzoFasceAttuale = handlerListino.ottieniPrezziFasce();
+        HashMap<TipologiaOmbrellone, Double> prezzoTipologieAttuale = handlerListino.getTipologie();
+
+        Map<Date, Integer> m1 = new TreeMap(mappaDateFasceTemp);
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 
+        boolean annullamentoPrenotazione = false;
         for (Map.Entry<Date, Integer> entry : m1.entrySet()) {
-            System.out.println(df.format(entry.getKey()));
-            if (!controlloOccupazione(entry.getKey(), entry.getValue())) {
+            System.out.println("Ombrelloni disponibili il "+df.format(entry.getKey())+" nella fascia oraria "+entry.getValue()+".");
+            ArrayList<Ombrellone> listaPrenotabili;
+            listaPrenotabili = controlloOccupazione(entry.getKey(), entry.getValue());
+            if (listaPrenotabili.isEmpty()) {
                 System.out.println("Non ci sono ombrelloni disponibili il " + entry.getKey() + " nell'orario specificato, annullare la prenotazione?");
 
                 if (Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y")) {
-                    //TODO: trovare un modo per uscire e non applicare niente.
+
+                    annullamentoPrenotazione = true;
+                    break;
+                } else {
+                    listaPrenotabili.remove(entry);
+                    continue;
                 }
             } else {
-                //mostraDisposizioneOmbrelloniDisponibiliEPrezzo();
-                selezionaOmbrellone();
-                selezionaNumeroLettini();
+                boolean working=true;
+                HashMap<Date, ArrayList<Ombrellone>> mappaDateListaOmbrelloni = new HashMap<>();
+                ArrayList<Ombrellone> ombrelloniScelti = new ArrayList<>();
+                while(working) {
+                    mostraDisposizioneOmbrelloniDisponibiliEPrezzo(listaPrenotabili);
 
-                listaPrenotazioni.add(prenotazioneInCorso);
+                    int idOmbrelloneSelezionato = selezionaOmbrellone();
+                    int numeroLettiniSelezionati;
+                    if (getOmbrelloneById(idOmbrelloneSelezionato, listaPrenotabili) == null) {
+
+                        System.out.println("L'ombrellone non è disponibile, sceglierne un altro");
+                        continue;
+                    } else {
+                        ombrelloniScelti.add(getOmbrelloneById(idOmbrelloneSelezionato, listaPrenotabili));
+                        listaPrenotabili.remove(getOmbrelloneById(idOmbrelloneSelezionato, listaPrenotabili));
+                        numeroLettiniSelezionati = selezionaNumeroLettini();
+                    }
+
+                    if (prenotazioneInCorso == null) {
+                        prenotazioneInCorso = new Prenotazione();
+                        prenotazioneInCorso.setDataInizio(dataInizioPrenotazione);
+                        prenotazioneInCorso.setDataFine(dataFinePrenotazione);
+                        prenotazioneInCorso.setMappaDateFasce(mappaDateFasceTemp);
+                        //TODO: metodo per creare gli id
+                        //prenotazioneInCorso.setId();
+                        prenotazioneInCorso.setIdCliente(idCliente);
+                        ArrayList<Ombrellone> listaOmbrelloniPrenotazione = new ArrayList<>();
+                        prenotazioneInCorso.setOmbrelloni(listaOmbrelloniPrenotazione);
+                        prenotazioneInCorso.setMappaDateListaOmbrelloni(mappaDateListaOmbrelloni);
+
+                    }
+                    prenotazioneInCorso.getOmbrelloni().add(getOmbrelloneById(idOmbrelloneSelezionato, listaPrenotabili));
+                    //prenotazioneInCorso.getOmbrelloni().add(spiaggiaAssociata.getOmbrellone(idOmbrelloneSelezionato));
+                    getOmbrelloneById(idOmbrelloneSelezionato, prenotazioneInCorso.getOmbrelloni()).setNumeroLettiniAssociati(numeroLettiniSelezionati);
+                    //listaPrenotabili.remove(idOmbrelloneSelezionato);
 
 
-                prenotazioneInCorso.setPrezzoTotale(prenotazioneInCorso.getPrezzoTotale()+calcoloSubtotale());
-                System.out.println("Il prezzo per questa prenotazione è ora di "+prenotazioneInCorso.getPrezzoTotale()+"€.");
+                    prenotazioneInCorso.setPrezzoTotale(prenotazioneInCorso.getPrezzoTotale() + calcoloSubtotale(prenotazioneInCorso));
+                    System.out.println("Il prezzo per questa prenotazione è ora di " + prenotazioneInCorso.getPrezzoTotale() + "€.\n");
 
+                    System.out.println("Aggiungere altri ombrelloni alla prenotazione? [y/n]");
+                    working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
+                }
+                prenotazioneInCorso.getMappaDateListaOmbrelloni().put(entry.getKey(),ombrelloniScelti);
             }
         }
-
-        String answer;
-        boolean yn;
-
-        System.out.println("Hai scelto questa prenotazione:");
-        System.out.println("Ombrellone " + prenotazioneInCorso.getId() + " e " + prenotazioneInCorso.getNumeroLettini() + " lettino/i.");
-        System.out.println("da " + prenotazioneInCorso.getDataInizio() + " a " + prenotazioneInCorso.getDataFine() + ".");
-        System.out.println("Confermi la prenotazione? (y/n)");
-        while (true) {
-            answer = sc.nextLine().trim().toLowerCase();
-            if (answer.equals("y")) {
-                yn = true;
-                confermaOperazione();
-                break;
-            } else if (answer.equals("n")) {
-                yn = false;
-                prenotaOmbrellone();
-                break;
-            } else {
-                System.out.println("Reinserire (y/n)");
-            }
+        if (annullamentoPrenotazione) {
+            System.out.println("Prenotazione annullata.");
+            return;
         }
-        inviaDatiPagamento();
-        //TODO: UpdateDatabase();
 
+        recapPrenotazione(prenotazioneInCorso);
+
+        if (this.confermaOperazione()) {
+            this.elaboraPagamento(this.richiestaDatiPagamento(), prenotazioneInCorso.getPrezzoTotale());
+            this.associatedDBMS.aggiungiPrenotazione(prenotazioneInCorso);
+        } else {
+            System.out.println("Prenotazione annullata.");
+            return;
+        }
     }
 
-    private double calcoloSubtotale() {
-        double subTotale = 0.0;
-        return subTotale;
-    }
 
-
-    private void inserisciOrarioDesiderato() {
+    /**
+     * @return data di inizo della prenotazione selezionata dal cliente
+     */
+    private Date inserisciDataInizioDesiderata() {
         boolean working = true;
+        Date dataStart = null;
         while (working) {
             System.out.print("Inserire la data di inizio [gg/mm/yyyy]: ");
             String dataStartTemp = sc.next();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             dateFormat.setLenient(false);
-            Date dataStart =null;
+            dataStart = null;
             try {
                 dataStart = dateFormat.parse(dataStartTemp);
                 System.out.println(dataStart);
+                working = false;
             } catch (ParseException e) {
-                System.out.println(dataStartTemp+" è una data non valida, riprovare");
+                System.out.println(dataStartTemp + " è una data non valida, riprovare");
                 continue;
             }
 
+        }
+        return dataStart;
+    }
+
+    /**
+     * @return data di fine della prenotazione selezionata dal cliente
+     */
+    private Date inserisciDataFineDesiderata() {
+        boolean working = true;
+        Date dataEnd = null;
+        while (working) {
             System.out.print("Inserire la data di fine [gg/mm/yyyy]: ");
             String dataEndTemp = sc.next();
-            Date dataEnd =null;
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            dateFormat.setLenient(false);
+            dataEnd = null;
             try {
                 dataEnd = dateFormat.parse(dataEndTemp);
                 System.out.println(dataEnd);
+                working = false;
             } catch (ParseException e) {
-                System.out.println(dataEndTemp+" è una data non valida, riprovare");
+                System.out.println(dataEndTemp + " è una data non valida, riprovare");
                 continue;
             }
-
-            prenotazioneInCorso.setDataInizio(dataStart);
-            prenotazioneInCorso.setDataFine(dataEnd);
-
-            if (controlloDataCorretta(dataStart, dataEnd)) {
-                working = false;
-            }
         }
-    }
-
-    private void associaFasciaOrario(Date dataInizio, Date dataFine) {
-        HashMap<Date, Integer> mappaDateFasceTemp = new HashMap<>();
-        int fasciaOraria;
-        System.out.print("Inserire la fascia oraria desiderata per la giornata del "+dataInizio+": \n 1 = solo mattina, 2 = solo pomeriggio, 3 = mattina e pomeriggio: ");
-        fasciaOraria = provaScannerInt();
-        mappaDateFasceTemp.put(dataInizio, fasciaOraria);
-        while (dataInizio.before(dataFine)) {
-            dataInizio = addDays(dataInizio, 1);
-            System.out.print("Inserire la fascia oraria desiderata per la giornata del "+dataInizio+": \n 1 = solo mattina, 2 = solo pomeriggio, 3 = mattina e pomeriggio: ");
-            fasciaOraria = provaScannerInt();
-            mappaDateFasceTemp.put(dataInizio, fasciaOraria);
-        } if (this.confermaOperazione()) {
-            System.out.println("Operazioni eseguite");
-            this.prenotazioneInCorso.setMappaDateFasce(mappaDateFasceTemp);
-            //System.out.println(prenotazioneInCorso.getMappaDateFasce().toString());
-
-        } else System.out.println("Operazioni annullate");
-    }
-
-    private static Date addDays(Date d1, int i) {
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(d1);
-        cal.add(Calendar.DATE, 1);
-        return cal.getTime();
+        return dataEnd;
     }
 
     /**
@@ -321,22 +333,202 @@ public class HandlerPrenotazione {
         }
     }
 
-    //TODO: controllo se la giornata è sempre piena
-    private boolean controlloOccupazione(Date dataPrenotazione, int fasciaOrariaPrenotazione) {
-        return true;
+    /**
+     * @param dataInizio data di inizo della prenotazione selezionata dal cliente
+     * @param dataFine data di fine della prenotazione selezionata dal cliente
+     * @return hashmap dentro la quale si associano tutte le date tra l'inizio e la fine della
+     * prenotazione a una fascia d'orario
+     */
+    private HashMap<Date, Integer> associaFasciaOrario(Date dataInizio, Date dataFine) {
+        HashMap<Date, Integer> mappaDateFasceTemp = new HashMap<>();
+        int fasciaOraria;
+        System.out.print("Inserire la fascia oraria desiderata per la giornata del "+dataInizio+": \n 1 = solo mattina, 2 = solo pomeriggio, 3 = mattina e pomeriggio: ");
+        fasciaOraria = provaScannerInt();
+        mappaDateFasceTemp.put(dataInizio, fasciaOraria);
+        while (dataInizio.before(dataFine)) {
+            dataInizio = addDays(dataInizio, 1);
+            System.out.print("Inserire la fascia oraria desiderata per la giornata del "+dataInizio+": \n 1 = solo mattina, 2 = solo pomeriggio, 3 = mattina e pomeriggio: ");
+            fasciaOraria = provaScannerInt();
+            mappaDateFasceTemp.put(dataInizio, fasciaOraria);
+        } if (this.confermaOperazione()) {
+            System.out.println("Fasce orarie associate");
+            return mappaDateFasceTemp;
+
+        } else System.out.println("Operazione annullata");
+        return mappaDateFasceTemp;
     }
 
-    private void selezionaOmbrellone() {
+    private static Date addDays(Date d1, int i) {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(d1);
+        cal.add(Calendar.DATE, 1);
+        return cal.getTime();
+    }
+
+    /**
+     * @param dataPrenotazione data del calendario della prenotazione da controllare
+     * @param fasciaOrariaPrenotazione fascia oraria della prenotazione da controllare
+     * @return lista degli ombrelloni disponibili in quella data e fascia oraria
+     */
+    private ArrayList<Ombrellone> controlloOccupazione(Date dataPrenotazione, int fasciaOrariaPrenotazione) {
+        for (ArrayList<Ombrellone> innerlist : handlerSpiaggiaAssociato.ottieniVistaSpiaggia()) {
+            for (Ombrellone i : innerlist) {
+                handlerSpiaggiaAssociato.getOmbrellone(i.getIdOmbrellone()).setIsBooked(false);
+            }
+        }
+
+        ArrayList<Ombrellone> listaTemp = new ArrayList<>();
+        ArrayList<Ombrellone> listaOmbrPrenotabili = new ArrayList<>();
+
+        for (ArrayList<Ombrellone> innerlist : handlerSpiaggiaAssociato.ottieniVistaSpiaggia()) {
+            for (Ombrellone i : innerlist) {
+                listaTemp.add(i);
+            }
+        }
+
+        for (Prenotazione prenotazione : this.listaPrenotazioni) {
+            for (Map.Entry<Date, Integer> entry : prenotazione.getMappaDateFasce().entrySet()) {
+                if (entry.getKey().equals(dataPrenotazione) && ((entry.getValue() == fasciaOrariaPrenotazione) || (entry.getValue() == 3))) {
+                    for (Date data : prenotazione.getMappaDateListaOmbrelloni().keySet() ) {
+                        if(data.equals(dataPrenotazione)){
+                            for (Ombrellone prenotato : prenotazione.getMappaDateListaOmbrelloni().get(data)) {
+                                handlerSpiaggiaAssociato.getOmbrellone(prenotato.getIdOmbrellone()).setIsBooked(true);
+                            }
+                        }
+                    }
+                    if (listaTemp.stream().allMatch(Ombrellone::isBooked)) {
+                        //la spiaggia è completamente occupata
+                        return listaOmbrPrenotabili;
+                    } else {
+                        for (Ombrellone ombr : listaTemp) {
+                            if(ombr!=null){
+                                if(!ombr.isBooked()){
+                                    listaOmbrPrenotabili.add(ombr);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return listaOmbrPrenotabili;
+    }
+
+    private void mostraDisposizioneOmbrelloniDisponibiliEPrezzo(ArrayList<Ombrellone> listaPrenotabili) {
+        for (Ombrellone ombrellone : listaPrenotabili) {
+            System.out.println("Ombrellone: "+ombrellone.getIdOmbrellone()+", Tipo: "+ombrellone.getNomeTipo()+", Coordinate: "+ombrellone.getLocation().toString()+", Prezzo: "+calcoloPrezzoOmbrellone(ombrellone));
+        }
+    }
+
+    private Ombrellone getOmbrelloneById(int idOmbrellone, ArrayList<Ombrellone> listaTarget){
+        for (Ombrellone ombrellone : listaTarget) {
+            if (idOmbrellone==ombrellone.getIdOmbrellone()){
+                return ombrellone;
+            }
+        }
+        return null;
+    }
+
+    private double calcoloPrezzoOmbrellone(Ombrellone ombrellone) {
+        double prezzo = 0.0;
+        double prezzoFasciaDiPrezzoOmbrellone = 0.0;
+        double prezzoTipologiaOmbrellone = 0.0;
+
+        HashMap<FasciaDiPrezzo, Double> prezzoFasceAttuale = handlerListino.ottieniPrezziFasce();
+        HashMap<TipologiaOmbrellone, Double> prezzoTipologieAttuale = handlerListino.getTipologie();
+
+
+        for (Map.Entry<FasciaDiPrezzo, Double> entry : prezzoFasceAttuale.entrySet()) {
+            if (isOmbrelloneInFascia(ombrellone, entry.getKey())) {
+                prezzoFasciaDiPrezzoOmbrellone = entry.getValue();
+            }
+        }
+
+        for (Map.Entry<TipologiaOmbrellone, Double> entry : prezzoTipologieAttuale.entrySet()) {
+            if (ombrellone.getNomeTipo().equals(entry.getKey().getNome())) {
+                prezzoTipologiaOmbrellone = entry.getValue();
+            }
+
+        }
+        System.out.println("prezzo base ombrellone: "+handlerListino.ottieniPrezzoBaseOmbrellone()+"\n"+
+        "prezzo fascia: "+prezzoFasciaDiPrezzoOmbrellone+"\n"+
+        "prezzo tipo: "+prezzoTipologiaOmbrellone+"\n");
+        prezzo = handlerListino.ottieniPrezzoBaseOmbrellone() * prezzoFasciaDiPrezzoOmbrellone * prezzoTipologiaOmbrellone;
+
+        return prezzo;
+    }
+
+    /**
+     * @param ombrellone ombrellone preso in considerazione
+     * @param fasciaDiPrezzo fascia di prezzo presa in considerazione
+     * @return true se l'ombrellone si trova all'interno della fascia di prezzo
+     */
+    private boolean isOmbrelloneInFascia(Ombrellone ombrellone, FasciaDiPrezzo fasciaDiPrezzo){
+        if((ombrellone.getLocation().getxAxis()>= fasciaDiPrezzo.getCoordinateInizio().getxAxis()) && (ombrellone.getLocation().getyAxis()>= fasciaDiPrezzo.getCoordinateInizio().getyAxis())){
+            if((ombrellone.getLocation().getxAxis()<= fasciaDiPrezzo.getCoordinateFine().getxAxis()) && (ombrellone.getLocation().getyAxis()<= fasciaDiPrezzo.getCoordinateFine().getyAxis())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void recapPrenotazione(Prenotazione prenotazioneInCorso) {
+        System.out.println("Hai scelto questa prenotazione:");
+
+
+
+        for (Map.Entry<Date, Integer> entry :prenotazioneInCorso.getMappaDateFasce().entrySet()){
+            for (Map.Entry<Date, ArrayList<Ombrellone>> entry2 :prenotazioneInCorso.getMappaDateListaOmbrelloni().entrySet()){
+                if (entry.getKey().equals(entry2.getKey())) {
+                    System.out.println(entry.getKey() + " nella fascia oraria: " + entry.getValue() +".");
+                    for (Ombrellone ombrellone : entry2.getValue()) {
+                        System.out.println("Ombrellone " + ombrellone.getIdOmbrellone() + " e " + ombrellone.getNumeroLettiniAssociati() + " lettino/i.");
+                    }
+                }
+            }
+        }
+        System.out.println("Costo: "+calcoloSubtotale(prenotazioneInCorso));
+    }
+
+
+    private double calcoloSubtotale(Prenotazione prenotazione) {
+        double prezzo = 0.0;
+        double prezzoFasciaDiPrezzoPrenotazione = 0.0;
+        double prezzoTipologiaOmbrellonePrenotazione = 0.0;
+        double prezzoLettini = 0.0;
+
+        HashMap<FasciaDiPrezzo, Double> prezzoFasceAttuale = handlerListino.ottieniPrezziFasce();
+        HashMap<TipologiaOmbrellone, Double> prezzoTipologieAttuale = handlerListino.getTipologie();
+
+        for (Ombrellone ombrellone : prenotazione.getOmbrelloni()) {
+            for (Map.Entry<FasciaDiPrezzo, Double> entry : prezzoFasceAttuale.entrySet()) {
+                if (isOmbrelloneInFascia(ombrellone, entry.getKey())) {
+                    prezzoFasciaDiPrezzoPrenotazione = entry.getValue();
+                }
+            }
+            for (Map.Entry<TipologiaOmbrellone, Double> entry : prezzoTipologieAttuale.entrySet()) {
+                if (ombrellone.getNomeTipo().equals(entry.getKey().getNome())) {
+                    prezzoTipologiaOmbrellonePrenotazione = entry.getValue();
+                }
+            }
+
+            prezzo = prezzo + handlerListino.ottieniPrezzoBaseOmbrellone() *
+                    prezzoFasciaDiPrezzoPrenotazione *
+                    prezzoTipologiaOmbrellonePrenotazione +
+                    ombrellone.getNumeroLettiniAssociati()* handlerListino.ottieniPrezzoLettino();
+        }
+
+        return prezzo;
+    }
+
+    private int selezionaOmbrellone() {
         System.out.print("Inserire l'ombrellone desiderato: ");
-        int idOmbrellone = provaScannerInt();
-        prenotazioneInCorso.getOmbrelloni().add(spiaggiaAssociata.getOmbrellone(idOmbrellone));
-        spiaggiaAssociata.getOmbrellone(idOmbrellone).setIsBooked(true);
+        return provaScannerInt();
     }
-    private void selezionaNumeroLettini() {
-        System.out.print("Inserire il numero di lettini desiderato: ");
-        int numLettini = provaScannerInt();
-        prenotazioneInCorso.setNumeroLettini(numLettini);
 
+    private int selezionaNumeroLettini() {
+        System.out.print("Inserire il numero di lettini desiderato: ");
+        return provaScannerInt();
     }
 
 
@@ -430,7 +622,7 @@ public class HandlerPrenotazione {
     }
 
     private Double calcoloPrezzoTotaleCarrello() {
-        Double totale = 0.0;
+        double totale = 0.0;
         for(ProdottoBar currentProdotto : this.carrello.keySet())
             totale = totale + this.carrello.get(currentProdotto);
         return totale;
@@ -556,6 +748,18 @@ public class HandlerPrenotazione {
 
     private void inviaDatiPagamento() {
         //TODO: permettere l'inserimento dei dati per il pagamento
+    }
+
+    private int provaScannerInt(){
+        while(true){
+            try{
+                int intero = this.sc.nextInt();
+                this.sc.nextLine();
+                return intero;
+            } catch (Exception e) {
+                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
+            }
+        }
     }
 
 }

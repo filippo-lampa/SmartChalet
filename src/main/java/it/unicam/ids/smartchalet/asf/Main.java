@@ -8,7 +8,7 @@ public class Main {
         Listino listino = new Listino();
         HandlerSpiaggia handlerSpiaggiaTest = new HandlerSpiaggia(spiaggiaTest, dbmsController, listino);
         HandlerListino handlerListino = new HandlerListino(listino, dbmsController, spiaggiaTest);
-        HandlerPrenotazione handlerPrenotazione = new HandlerPrenotazione(spiaggiaTest, dbmsController, handlerListino);
+        HandlerPrenotazione handlerPrenotazione = new HandlerPrenotazione(spiaggiaTest, dbmsController, handlerListino, handlerSpiaggiaTest);
 
         ListaAttrezzatura listaAttrezzatura = new ListaAttrezzatura();
         HandlerAttrezzatura handlerAttrezzatura = new HandlerAttrezzatura(listaAttrezzatura, dbmsController);
@@ -25,9 +25,8 @@ public class Main {
         handlerSpiaggiaTest.aggiungiGrigliaSpiaggia();
         handlerSpiaggiaTest.aggiungiOmbrellone();
         handlerSpiaggiaTest.modificaGrigliaSpiaggia();
-         handlerSpiaggiaTest.modificaOmbrellone();
-
-        handlerPrenotazione.cancellaPrenotazione(1);
+        handlerSpiaggiaTest.modificaOmbrellone();
+        handlerPrenotazione.prenotaOmbrellone(5);
         handlerListino.aggiungiProdottoBar();
         handlerListino.modificaFasciaDiPrezzo();
         handlerListino.aggiungiFasciaDiPrezzo();
@@ -35,8 +34,10 @@ public class Main {
         handlerListino.impostaPrezziOmbrellone();
         handlerAttrezzatura.aggiungiAttrezzatura();
         handlerAttrezzatura.rimuoviAttrezzatura();
+
 */
-        handlerPrenotazione.prenotaOmbrellone();
+
+        handlerPrenotazione.cancellaPrenotazione(1);
 
     }
 }
