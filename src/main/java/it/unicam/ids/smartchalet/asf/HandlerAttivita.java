@@ -1,34 +1,42 @@
 package it.unicam.ids.smartchalet.asf;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class HandlerAttivita {
 
-
     private ListaAttivita listaAttivitaAssociata;
     private DBMSController associatedDBMS;
     private HandlerAttrezzatura handlerAttrezzaturaAssociato;
     private Scanner sc;
+    private static HandlerAttivita instance = null;
 
-    public HandlerAttivita(ListaAttivita listaAttivitaAssociata, DBMSController associatedDBMS, HandlerAttrezzatura handlerAttrezzaturaAssociato){
-        this.listaAttivitaAssociata = listaAttivitaAssociata;
-        this.associatedDBMS = associatedDBMS;
-        this.handlerAttrezzaturaAssociato = handlerAttrezzaturaAssociato;
+    private HandlerAttivita(){
+        this.listaAttivitaAssociata = new ListaAttivita();
+        this.associatedDBMS = DBMSController.getInstance();
+        this.handlerAttrezzaturaAssociato = HandlerAttrezzatura.getInstance();
         this.sc = new Scanner(System.in);
     }
 
+    public static HandlerAttivita getInstance(){
+        if (instance == null) {
+            instance = new HandlerAttivita();
+        }
+        return instance;
+    }
+
     public void aggiungiAttivita(){
-        //    this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniListaAttivita());  //TODO
-        // this.handlerAttrezzaturaAssociato.aggiornaListaAttrezzatura();
+        this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniListaAttivita());
+        this.handlerAttrezzaturaAssociato.aggiornaListaAttrezzatura();
+        this.listaAttivitaAssociata.printListaAttivita();
 
         boolean flag;
         do {
             Attivita attivitaProvvisoria = this.inserisciInformazioniAttivita();
             if(this.listaAttivitaAssociata.isNuovaAttivita(attivitaProvvisoria)){
                 this.associazioneAttrezzatureAdAttivita(attivitaProvvisoria);
-
                 this.listaAttivitaAssociata.aggiungiAttivita(attivitaProvvisoria);
             }
             else System.out.println("L'attivita' che stai cercando di aggiungere e' gia' presente");
@@ -37,7 +45,12 @@ public class HandlerAttivita {
             flag = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         } while (flag);
 
-        if (this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
+        if(this.confermaOperazione()){
+            if(this.associatedDBMS.aggiornaListaAttivita(this.listaAttivitaAssociata.ottieniListaAttivitaAggiornata())){
+                System.out.println("Operazione eseguita con successo");
+            }
+            else System.out.println("Operazioni fallita");
+        }
         else System.out.println("Operazioni annullate");
 
     }
@@ -114,7 +127,7 @@ public class HandlerAttivita {
 
         int fasciaOraria = this.inserimentoFasciaUtente();
 
-        return new Attivita(this.listaAttivitaAssociata.getNewIdAttivita(),nome,descrizione,data,maxPartecipanti,animatore,oreDurata, fasciaOraria);
+        return new Attivita(nome,descrizione,data,maxPartecipanti,animatore,oreDurata, fasciaOraria);
     }
 
 
@@ -129,6 +142,7 @@ public class HandlerAttivita {
                 }
                 return intero;
             } catch (Exception e) {
+                this.sc.nextLine();
                 System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
             }
         }
@@ -152,8 +166,11 @@ public class HandlerAttivita {
         Date dataCorrente = new Date();
         while(true){
             System.out.print("Inserisci la data dell' attivita [gg/mm/yyyy]: ");
+            String dataTemp = sc.nextLine();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            dateFormat.setLenient(false);
             try {
-                data = new SimpleDateFormat("dd/MM/yyyy").parse(sc.nextLine());
+                data = dateFormat.parse(dataTemp);
                 if (data.before(dataCorrente)) {
                     System.out.println("La data inserita è antecedente alla data odierna");
                     continue;
@@ -167,11 +184,11 @@ public class HandlerAttivita {
     }
 
     public void modificaAttivita(){
-        //this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniAttivitaAggiornate()); //TODO implementare richieste DB
+        this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniListaAttivita());
         ArrayList<Attivita> attivitaAggiornate = this.listaAttivitaAssociata.ottieniListaAttivitaAggiornata();
-        ArrayList<Attrezzatura> attrezzaturaAggiornata = this.handlerAttrezzaturaAssociato.ottieniListaAttrezzaturaAggiornata();
+        HashMap<Attrezzatura,Integer> attrezzaturaAggiornata = this.handlerAttrezzaturaAssociato.ottieniMappaAttrezzature();
         if(attivitaAggiornate.isEmpty()) {
-            System.out.println("La lista delle attività è vuota, impossibile moificare un'attività");
+            System.out.println("La lista delle attività è vuota, impossibile modificare un'attività");
             return;
         }
         this.printListaAttivita(attivitaAggiornate);
@@ -191,14 +208,19 @@ public class HandlerAttivita {
             completed = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "n");
         }while(!completed);
 
-        if(this.confermaOperazione()) System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
+        if(this.confermaOperazione()) {
+            this.associatedDBMS.aggiornaListaAttivita(this.listaAttivitaAssociata.ottieniListaAttivitaAggiornata());
+            this.associatedDBMS.aggiornaMappaAttrezzature(this.handlerAttrezzaturaAssociato.ottieniMappaAttrezzature());
+        }
         else System.out.println("Operazioni annullate");
     }
 
     private void eliminaAttivita(Attivita attivitaDaModificare) {
         System.out.println("Confermi di voler eliminare l'Attivita? [y/n] ");
-        if(Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y"))
+        if(Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y")) {
             this.listaAttivitaAssociata.rimuoviAttivita(attivitaDaModificare);
+            System.out.println("Attività eliminata correttamente");
+        }
     }
 
     private void modificaParametriAttivita(Attivita attivitaDaModificare) {
@@ -310,4 +332,14 @@ public class HandlerAttivita {
         System.out.println("Confermi l'operazione? [y/n] ");
         return Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
     }
+
+    public ListaAttivita getListaAttivitaAssociata() {
+        return listaAttivitaAssociata;
+    }
+
+    public ArrayList<Attivita> ottieniListaAttivitaDisponibili() {
+        this.listaAttivitaAssociata.aggiornaListaAttivita(this.associatedDBMS.ottieniListaAttivita());
+        return this.listaAttivitaAssociata.ottieniListaAttivitaAggiornata();
+    }
+
 }

@@ -13,10 +13,6 @@ public class ListaAttrezzatura {
         this.mappaAttrezzature = new HashMap<>();
     }
 
-    public void aggiornaListaAttrezzature(HashMap<Attrezzatura,Integer> attrezzaturaAggiornata) {
-        this.mappaAttrezzature = attrezzaturaAggiornata;
-    }
-
     public ArrayList<Attrezzatura> ottieniListaAttrezzaturaAggiornata() {
         return new ArrayList<>(this.mappaAttrezzature.keySet());
     }
@@ -39,9 +35,11 @@ public class ListaAttrezzatura {
     }
 
     public void printMappaAttrezzature() {
-        mappaAttrezzature.entrySet().forEach(entry -> {
-            System.out.println("Attrezzatura: " + entry.getKey().getNome() + " | Disponibilità: " + entry.getValue());
-        });
+        if(!this.mappaAttrezzature.isEmpty()) {
+            mappaAttrezzature.entrySet().forEach(entry -> {
+                System.out.println("Attrezzatura: " + entry.getKey().getNome() + " | Disponibilità: " + entry.getValue());
+            });
+        } else System.out.println("Al momento non ci sono attrezzature");
     }
 
     public boolean controlloAttrezzaturaEsistente(String nomeAttrezzatura) {

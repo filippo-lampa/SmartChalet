@@ -3,6 +3,7 @@ package it.unicam.ids.smartchalet.asf;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
 public class Spiaggia {
 
@@ -12,14 +13,6 @@ public class Spiaggia {
     public Spiaggia(){
         this.totaleOmbrelloni = 0;
         this.listaOmbrelloni = new ArrayList<>();
-        /*for(int i=0;i<4;i++){
-            ArrayList<Ombrellone> lista= new ArrayList<>();
-            for(int j=0;j<4;j++){
-                lista.add(null);
-            }
-            listaOmbrelloni.add(lista);
-        }*/
-
     }
 
     public ArrayList<ArrayList<Ombrellone>> getListaOmbrelloni(){
@@ -45,6 +38,8 @@ public class Spiaggia {
         int colonnaSecondoOmbrellone = secondoOmbrellone.getLocation().getyAxis();
         listaOmbrelloni.get(filaPrimoOmbrellone).set(colonnaPrimoOmbrellone, secondoOmbrellone);
         listaOmbrelloni.get(filaSecondoOmbrellone).set(colonnaSecondoOmbrellone, primoOmbrellone);
+        primoOmbrellone.setLocation(new Coordinate(filaSecondoOmbrellone,colonnaPrimoOmbrellone));
+        secondoOmbrellone.setLocation(new Coordinate(filaSecondoOmbrellone,colonnaSecondoOmbrellone));
     }
 
     public void spostaOmbrellone(Ombrellone ombrellone, Coordinate nuoveCoordinate) {
@@ -61,7 +56,7 @@ public class Spiaggia {
         listaOmbrelloni.get(filaOmbrellone).get(colonnaOmbrellone).setTipo(tipologia);
     }
 
-    public void rimuoviOmbrellone(Ombrellone ombrellone){
+    public boolean rimuoviOmbrellone(Ombrellone ombrellone){
         Ombrellone ombrelloneDaRimuovere;
         Ombrellone currentOmbrellone;
         for(ArrayList<Ombrellone> currentRow : listaOmbrelloni) {
@@ -73,10 +68,12 @@ public class Spiaggia {
                         if (!currentOmbrellone.isBooked()) {
                             iter.remove();
                             totaleOmbrelloni--;
+                            return true;
                         } else System.out.println("Ombrellone prenotato non rimuovibile");
                 }
             }
         }
+        return false;
     }
 
     public void aggiungiOmbrellone(Ombrellone ombrellone){
@@ -152,12 +149,73 @@ public class Spiaggia {
         return false;
     }
 
+    public void aggiornaSpiaggia(ArrayList<ArrayList<Ombrellone>> listaOmbrelloni) {
+        int tempTotale = 0;
+        for(ArrayList<Ombrellone> riga : listaOmbrelloni)
+            for(Ombrellone ombrellone : riga)
+                if(ombrellone != null)
+                    tempTotale++;
+        this.totaleOmbrelloni = tempTotale;
+        this.listaOmbrelloni = listaOmbrelloni;
+    }
+
+    public void aggiungiNuovaRiga(int sceltaRiga, String direzione, int lunghezzaNuovaRiga) {
+        ArrayList<Ombrellone> appoggio = new ArrayList<>();
+        for(int i = 0;i<lunghezzaNuovaRiga;i++){
+            appoggio.add(null);
+        }
+
+        if(Objects.equals(direzione, "sopra")){
+            this.listaOmbrelloni.add(sceltaRiga, appoggio);
+        }
+        if(Objects.equals(direzione, "sotto")){
+            if(this.listaOmbrelloni.size()-1 == sceltaRiga) this.listaOmbrelloni.add(appoggio);
+            else{
+                this.listaOmbrelloni.add(sceltaRiga+1, appoggio);
+            }
+        }
+        this.aggiornaCoordinateOmbrelloniSpiaggia();
+    }
+
+    private void aggiornaCoordinateOmbrelloniSpiaggia(){
+        int x=0;
+        int y=0;
+        for(ArrayList<Ombrellone> riga:this.listaOmbrelloni){
+            x=0;
+            for(Ombrellone ombrellone : riga){
+                if(ombrellone == null) continue;
+                ombrellone.setLocation(new Coordinate(x,y));
+                x++;
+            }
+            y++;
+        }
+    }
+
+    private void modificaCoordinate(int sceltaRiga){
+        if(this.listaOmbrelloni.size() < sceltaRiga){
+            for(int i = sceltaRiga;i<this.listaOmbrelloni.size();i++){
+                for(Ombrellone ombrellone : this.listaOmbrelloni.get(i)){
+                    if(ombrellone == null) continue;
+                    ombrellone.setLocation(new Coordinate(ombrellone.getLocation().getxAxis(),ombrellone.getLocation().getyAxis()+1));
+                }
+            }
+        }
+    }
+
+    public void eliminaRiga(int sceltaRiga) {
+        this.listaOmbrelloni.remove(sceltaRiga);
+        this.aggiornaCoordinateOmbrelloniSpiaggia();
+    }
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
+        str.append("\n");
         for (int i = 0; i < this.listaOmbrelloni.size(); i++) {
+            str.append(i).append(" |").append("\t");
             for (int j = 0; j < this.listaOmbrelloni.get(i).size(); j++) {
-                str.append(this.listaOmbrelloni.get(i).get(j)).append("\t");
+                if(this.listaOmbrelloni.get(i).get(j)==null) str.append(this.listaOmbrelloni.get(i).get(j)).append("\t");
+                else str.append(" ⛱  ").append("\t");
             }
             str.append("\n");
         }
