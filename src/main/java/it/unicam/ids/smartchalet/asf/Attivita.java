@@ -2,20 +2,17 @@ package it.unicam.ids.smartchalet.asf;
 
 import org.w3c.dom.Attr;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Attivita {
 
-    private int id;
     private Date data;
-    private int fasciaOraria;   //TODO controllare modifica
-
-    public void setNumeroIscritti(int numeroIscritti) {
-        this.numeroIscritti = numeroIscritti;
-    }
-
-    private int numeroIscritti; //TODO controllare aggiunta parametro ed aggiornare diagramma
+    private int fasciaOraria;
+    private int numeroIscritti;
     private String nome;
     private String descrizione;
     private int maxPartecipanti;
@@ -23,7 +20,20 @@ public class Attivita {
     private HashMap<Attrezzatura,Integer> attrezzatureAssociate;
     private int oreDurata;
 
-    public Attivita(int id, String nome, String descrizione, Date data, int maxPartecipanti, String animatore, int oreDurata, int fasciaOraria){
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Attivita attivita = (Attivita) o;
+        return fasciaOraria == attivita.fasciaOraria && Objects.equals(data, attivita.data) && Objects.equals(nome, attivita.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data, fasciaOraria, nome);
+    }
+
+    public Attivita(String nome, String descrizione, Date data, int maxPartecipanti, String animatore, int oreDurata, int fasciaOraria){
         this.attrezzatureAssociate = new HashMap<>();
         this.nome = nome;
         this.descrizione = descrizione;
@@ -35,6 +45,9 @@ public class Attivita {
         this.numeroIscritti = 0;
     }
 
+    public void setNumeroIscritti(int numeroIscritti) {
+        this.numeroIscritti = numeroIscritti;
+    }
 
     public int getFasciaOraria() {
         return fasciaOraria;
@@ -73,19 +86,17 @@ public class Attivita {
     }
 
     public void printDettagliAttivita(){
-
-        System.out.println("Attività{" +
-                "data=" + data +
-                ", nome='" + nome + '\'' +
-                ", descrizione='" + descrizione + '\'' +
-                ", maxPartecipanti=" + maxPartecipanti +
-                ", animatore='" + animatore + '\'' +
-                ", oreDurata=" + oreDurata
+        DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+        System.out.println(nome + ":\t" +
+                formatter.format(data) + '\n' +
+                descrizione + '\n' + "Numero massimo di partecipanti: " +
+                maxPartecipanti + '\n' + "Numero posti disponibili: " +
+                (maxPartecipanti - numeroIscritti) + '\n' +
+                "Animatore: " + animatore + '\n' +
+                "Durata (ore): " + oreDurata
         );
-
-        System.out.println("attrezzatura associata: ");
         printAttrezzatureAssociate();
-        System.out.println(" }");
+        System.out.println();
     }
 
     public void printAttrezzatureAssociate(){
@@ -93,10 +104,6 @@ public class Attivita {
         for(Attrezzatura attrezzatura : this.attrezzatureAssociate.keySet()){
             System.out.println("Nome: " + attrezzatura.getNome() + "\t|\t" + this.attrezzatureAssociate.get(attrezzatura) + "pz");
         }
-    }
-
-    public int getId() {
-        return id;
     }
 
     public Date getData() {

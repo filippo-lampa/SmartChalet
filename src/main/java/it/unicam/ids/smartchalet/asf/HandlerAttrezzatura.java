@@ -7,19 +7,23 @@ public class HandlerAttrezzatura {
     private ListaAttrezzatura listaAttrezzaturaAssociata;
     private DBMSController associatedDBMS;
     Scanner sc;
+    private static HandlerAttrezzatura instance = null;
 
-    public HandlerAttrezzatura(ListaAttrezzatura listaAttrezzaturaAssociata, DBMSController associatedDBMS){
-        this.listaAttrezzaturaAssociata = listaAttrezzaturaAssociata;
-        this.associatedDBMS = associatedDBMS;
+    private HandlerAttrezzatura(){
+        this.listaAttrezzaturaAssociata = new ListaAttrezzatura();
+        this.associatedDBMS = DBMSController.getInstance();
         this.sc = new Scanner(System.in);
     }
 
-    public ArrayList<Attrezzatura> ottieniListaAttrezzaturaAggiornata() {
-        return this.listaAttrezzaturaAssociata.ottieniListaAttrezzaturaAggiornata();
+    public static HandlerAttrezzatura getInstance() {
+        if (instance == null) {
+            instance = new HandlerAttrezzatura();
+        }
+        return instance;
     }
 
     public HashMap<Attrezzatura,Integer> ottieniMappaAttrezzature() {
-        this.listaAttrezzaturaAssociata.aggiornaListaAttrezzature(this.associatedDBMS.ottieniMappaAttrezzature());
+        this.listaAttrezzaturaAssociata.aggiornaMappaAttrezzatura(this.associatedDBMS.ottieniMappaAttrezzature());
         return this.listaAttrezzaturaAssociata.getMappaAttrezzatura();
     }
 
@@ -49,8 +53,7 @@ public class HandlerAttrezzatura {
         while (working) {
 
             System.out.println("Digitare 1 per creare una nuova attrezzatura o 2 per aggiungere elementi ad un'attrezzatura esistente");
-            int op = sc.nextInt();
-            sc.nextLine();
+            int op = this.provaScannerInt();
             if(op == 1){
                 creaAttrezzatura();
             }
@@ -62,9 +65,8 @@ public class HandlerAttrezzatura {
             working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }
         if (this.confermaOperazione()) {
-            // this.associatedDBMS.aggiornaMappaAttrezzature(this.listaAttrezzaturaAssociata.getMappaAttrezzatura());
-            System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
-
+            this.associatedDBMS.aggiornaMappaAttrezzature(this.listaAttrezzaturaAssociata.getMappaAttrezzatura());
+            System.out.println("Operazioni eseguite");
         } else System.out.println("Operazioni annullate");
     }
 
@@ -144,7 +146,7 @@ public class HandlerAttrezzatura {
     }
 
     public void rimuoviAttrezzatura() {
-       // listaAttrezzaturaAssociata.aggiornaMappaAttrezzatura(associatedDBMS.ottieniMappaAttrezzature());  //TODO
+        listaAttrezzaturaAssociata.aggiornaMappaAttrezzatura(associatedDBMS.ottieniMappaAttrezzature());
         listaAttrezzaturaAssociata.printMappaAttrezzature();
 
         boolean working = true;
@@ -155,23 +157,19 @@ public class HandlerAttrezzatura {
 
             nomeAttrezzatura = richiestaNomeAttrezzatura();
 
-            boolean goodAmount = false;
-            while (!goodAmount) {
-                quantitaAttrezzatura = richiestaNumeroAttrezzatura();
+            quantitaAttrezzatura = richiestaNumeroAttrezzatura();
 
-                if (listaAttrezzaturaAssociata.controlloDisponibilitaAttrezzatura(nomeAttrezzatura, quantitaAttrezzatura)) {
-                    goodAmount = true;
-                } else System.out.println("Non è possibile rimuovere " + quantitaAttrezzatura + " elementi, inserire un altro numero.");
+            if (listaAttrezzaturaAssociata.controlloDisponibilitaAttrezzatura(nomeAttrezzatura, quantitaAttrezzatura)) {
+                listaAttrezzaturaAssociata.rimuoviQuantitaAttrezzatura(nomeAttrezzatura, quantitaAttrezzatura);
+            } else System.out.println("Non è possibile rimuovere " + quantitaAttrezzatura + " elementi, inserire un altro numero.");
 
-            }
-            listaAttrezzaturaAssociata.rimuoviQuantitaAttrezzatura(nomeAttrezzatura, quantitaAttrezzatura);
             listaAttrezzaturaAssociata.printMappaAttrezzature();
             System.out.println("Rimuovere altre attrezzature? [y/n]");
             working = Objects.equals(this.sc.nextLine().trim().toLowerCase(Locale.ROOT), "y");
         }
         if (this.confermaOperazione()) {
-            // this.associatedDBMS.aggiornaMappaAttrezzature(this.listaAttrezzaturaAssociata.getMappaAttrezzatura());
-            System.out.println("Operazioni eseguite"); //TODO sostituire output con metodo legato al database
+            this.associatedDBMS.aggiornaMappaAttrezzature(this.listaAttrezzaturaAssociata.getMappaAttrezzatura());
+            System.out.println("Operazioni eseguite");
 
         } else System.out.println("Operazioni annullate");
     }
@@ -182,4 +180,16 @@ public class HandlerAttrezzatura {
 
     }
 
+    private int provaScannerInt(){
+        while(true){
+            try{
+                int intero = this.sc.nextInt();
+                this.sc.nextLine();
+                return intero;
+            } catch (Exception e) {
+                this.sc.nextLine();
+                System.out.println("Cio' che hai inserito non e' un valore numerico, ritenta ");
+            }
+        }
+    }
 }

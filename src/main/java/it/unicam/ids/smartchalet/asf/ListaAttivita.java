@@ -19,14 +19,14 @@ public class ListaAttivita {
         return  this.lista;
     }
 
-    public int getNewIdAttivita(){
-        int highestId = -1;
-        for(Attivita attivita : this.lista){
-            if(attivita.getId() > highestId){
-                highestId = attivita.getId();
+    public void printListaAttivita(){
+        if(this.lista.isEmpty())
+            System.out.println("La lista delle attività è vuota");
+        else{
+            for(Attivita attivita : lista){
+                attivita.printDettagliAttivita();
             }
         }
-        return highestId + 1;
     }
 
     public boolean isNuovaAttivita(Attivita attivita){  //controlloInserimento

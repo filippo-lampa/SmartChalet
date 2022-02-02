@@ -8,8 +8,8 @@ public class Menu {
     private ArrayList<ProdottoBar> listaProdotti;
     private HandlerListino handlerListinoAssociato;
 
-    public Menu(){
-
+    public Menu(HandlerListino handlerListinoAssociato){
+        this.handlerListinoAssociato = handlerListinoAssociato;
     }
 
     public HashMap<ProdottoBar,Double> ottieniProdottiEPrezzi(){

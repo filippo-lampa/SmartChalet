@@ -1,10 +1,26 @@
 package it.unicam.ids.smartchalet.asf;
 
+import java.util.Objects;
+
 public class FasciaDiPrezzo {
 
     private String nome;
     private Coordinate coordinateInizio;
     private Coordinate coordinateFine;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FasciaDiPrezzo that = (FasciaDiPrezzo) o;
+        return id == that.id && Objects.equals(nome, that.nome) && Objects.equals(coordinateInizio, that.coordinateInizio) && Objects.equals(coordinateFine, that.coordinateFine);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome, coordinateInizio, coordinateFine, id);
+    }
+
     private int id; //TODO
 
     public FasciaDiPrezzo(String nome){
